@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Login</title>
+</head>
+
+<body>
+
+<h2>SecureCode Lab Login</h2>
+
+<form method="post">
+{% csrf_token %}
+
+{{ form.as_p }}
+
+<button type="submit">Iniciar sesión</button>
+
+</form>
+
+</body>
+</html>
