@@ -3,6 +3,7 @@ from .forms import RegisterForm
 from .models import Profile
 from django.contrib.auth.decorators import login_required
 
+
 @login_required
 def home(request):
     return render(request, 'home.html')
@@ -22,7 +23,7 @@ def register(request):
 
             return redirect('login')
 
-        else:
-            form = RegisterForm()
+    else:  # ← CORRECCIÓN: este else ahora pertenece al if request.method == 'POST'
+        form = RegisterForm()
 
-        return render(request, 'registration/register.html', {'form': form})
+    return render(request, 'registration/register.html', {'form': form})
