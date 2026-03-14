@@ -2,12 +2,15 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from users.views import home, register
+from users.views import home, register, dashboard_estudiante, dashboard_admin
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('', home, name='home'),
     path('register/', register, name='register'),
+    path('dashboard/', dashboard_estudiante, name='dashboard_estudiante'),
+    path('dashboard/admin/', dashboard_admin, name='dashboard_admin'),
     path('projects/', include('projects.urls')),
+    path('analysis/', include('analysis_engine.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

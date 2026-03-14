@@ -3,28 +3,28 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Project
 from .forms import ProjectForm
+from users.views import es_admin
 
 
 @login_required
 def project_list(request):
-    """Lista todos los proyectos del usuario autenticado (RF-9)."""
-    projects = Project.objects.filter(user=request.user)
+    if es_admin(request.user):
+        projects = Project.objects.all().select_related('user')
+    else:
+        projects = Project.objects.filter(user=request.user)
     return render(request, 'projects/project_list.html', {'projects': projects})
 
 
 @login_required
 def project_create(request):
-    """Permite al estudiante crear y subir un nuevo proyecto (RF-4, RF-5)."""
     if request.method == 'POST':
         form = ProjectForm(request.POST, request.FILES)
-
         if form.is_valid():
             project = form.save(commit=False)
             project.user = request.user
             project.save()
             messages.success(request, f'Proyecto "{project.name}" creado exitosamente.')
             return redirect('project_list')
-
     else:
         form = ProjectForm()
 
@@ -33,19 +33,24 @@ def project_create(request):
 
 @login_required
 def project_detail(request, pk):
-    """Muestra el detalle de un proyecto específico del usuario."""
-    project = get_object_or_404(Project, pk=pk, user=request.user)
+    if es_admin(request.user):
+        project = get_object_or_404(Project, pk=pk)
+    else:
+        project = get_object_or_404(Project, pk=pk, user=request.user)
+
     return render(request, 'projects/project_detail.html', {'project': project})
 
 
 @login_required
 def project_delete(request, pk):
-    """Elimina un proyecto del usuario."""
-    project = get_object_or_404(Project, pk=pk, user=request.user)
+    if es_admin(request.user):
+        project = get_object_or_404(Project, pk=pk)
+    else:
+        project = get_object_or_404(Project, pk=pk, user=request.user)
 
     if request.method == 'POST':
         name = project.name
-        project.file.delete()  # Elimina el archivo físico también
+        project.file.delete()
         project.delete()
         messages.success(request, f'Proyecto "{name}" eliminado.')
         return redirect('project_list')
