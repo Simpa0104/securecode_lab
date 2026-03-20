@@ -31,31 +31,35 @@
 <div class="row">
     <div class="col-md-6 mb-4">
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <strong>Mis proyectos recientes</strong>
                 <a href="{% url 'project_list' %}" class="btn btn-sm btn-outline-primary">Ver todos</a>
             </div>
             <div class="card-body p-0">
                 {% if proyectos %}
-                <ul class="list-group list-group-flush">
-                    {% for proyecto in proyectos %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <a href="{% url 'project_detail' proyecto.pk %}" class="text-decoration-none">{{
-                                proyecto.name }}</a>
-                            <br><small class="text-muted">{{ proyecto.created_at|date:"d/m/Y" }}</small>
-                        </div>
-                        {% if proyecto.status == 'pending' %}<span class="badge bg-warning text-dark">Pendiente</span>
-                        {% elif proyecto.status == 'analyzed' %}<span class="badge bg-success">Analizado</span>
-                        {% else %}<span class="badge bg-danger">Error</span>{% endif %}
-                    </li>
-                    {% endfor %}
-                </ul>
+                    <ul class="list-group list-group-flush">
+                        {% for proyecto in proyectos %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <a href="{% url 'project_detail' proyecto.pk %}">{{ proyecto.name }}</a>
+                                <br>
+                                <small class="text-muted">{{ proyecto.created_at|date:"d/m/Y" }}</small>
+                            </div>
+                            {% if proyecto.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">Pendiente</span>
+                            {% elif proyecto.status == 'analyzed' %}
+                                <span class="badge bg-success">Analizado</span>
+                            {% else %}
+                                <span class="badge bg-danger">Error</span>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
                 {% else %}
-                <div class="text-center py-4 text-muted">
-                    <p>Aún no tienes proyectos.</p>
-                    <a href="{% url 'project_create' %}" class="btn btn-primary btn-sm">Subir primer proyecto</a>
-                </div>
+                    <div class="text-center py-4 text-muted">
+                        <p>Aun no tienes proyectos.</p>
+                        <a href="{% url 'project_create' %}" class="btn btn-primary btn-sm">Subir primer proyecto</a>
+                    </div>
                 {% endif %}
             </div>
         </div>
@@ -63,25 +67,29 @@
 
     <div class="col-md-6 mb-4">
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white"><strong>Últimos análisis</strong></div>
+            <div class="card-header">
+                <strong>Ultimos analisis</strong>
+            </div>
             <div class="card-body p-0">
                 {% if ultimos_analisis %}
-                <ul class="list-group list-group-flush">
-                    {% for analisis in ultimos_analisis %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <a href="{% url 'analisis_resultado' analisis.pk %}" class="text-decoration-none">{{
-                                analisis.project.name }}</a>
-                            <br><small class="text-muted">{{ analisis.fecha|date:"d/m/Y H:i" }}</small>
-                        </div>
-                        <span class="badge {% if analisis.score >= 80 %}bg-success{% elif analisis.score >= 60 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                    <ul class="list-group list-group-flush">
+                        {% for analisis in ultimos_analisis %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <a href="{% url 'analisis_resultado' analisis.pk %}">{{ analisis.project.name }}</a>
+                                <br>
+                                <small class="text-muted">{{ analisis.fecha|date:"d/m/Y H:i" }}</small>
+                            </div>
+                            <span class="badge {% if analisis.score >= 80 %}bg-success{% elif analisis.score >= 60 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
                                 {{ analisis.score }}/100
                             </span>
-                    </li>
-                    {% endfor %}
-                </ul>
+                        </li>
+                        {% endfor %}
+                    </ul>
                 {% else %}
-                <div class="text-center py-4 text-muted"><p>Aún no has ejecutado análisis.</p></div>
+                    <div class="text-center py-4 text-muted">
+                        <p>Aun no has ejecutado analisis.</p>
+                    </div>
                 {% endif %}
             </div>
         </div>

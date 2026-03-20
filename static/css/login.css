@@ -1,13 +1,9 @@
-/* ─────────────────────────────────────────
-   login.css — Estilos del login SecureCode Lab
-   ───────────────────────────────────────── */
-
 /* FONDO */
 body {
     background-color: #0f1923;
 }
 
-/* SECCIÓN CARRUSEL */
+/* SECCION CARRUSEL */
 .carousel-section {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
     border-radius: 16px;
@@ -18,8 +14,8 @@ body {
 
 .owasp-badge {
     display: inline-block;
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
     border-radius: 20px;
     padding: 3px 14px;
     font-size: 0.78rem;
@@ -27,22 +23,33 @@ body {
     margin-bottom: 1rem;
 }
 
+/* CARRUSEL — altura fija para evitar saltos entre slides */
+.carousel-inner {
+    min-height: 260px;
+}
+
+.carousel-item {
+    min-height: 260px;
+}
+
 .carousel-item h3 {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     font-weight: bold;
     margin-bottom: 0.75rem;
+    color: white;
 }
 
 .carousel-item p {
     color: #ced4da;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     line-height: 1.6;
 }
 
+/* PILLS DEL SLIDE DE BIENVENIDA */
 .feature-pill {
     display: inline-block;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
     border-radius: 20px;
     padding: 4px 14px;
     font-size: 0.8rem;
@@ -54,7 +61,7 @@ body {
 .severity-bar {
     height: 6px;
     border-radius: 3px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255,255,255,0.1);
     margin-top: 1.2rem;
 }
 
@@ -70,9 +77,9 @@ body {
     margin-top: 4px;
 }
 
-/* INDICADORES CARRUSEL */
+/* INDICADORES */
 .carousel-indicators [data-bs-target] {
-    background-color: rgba(255, 255, 255, 0.4);
+    background-color: rgba(255,255,255,0.4);
     width: 8px;
     height: 8px;
     border-radius: 50%;
@@ -87,18 +94,35 @@ body {
 .login-card {
     background: white;
     border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
     padding: 2.5rem;
 }
 
 .login-card h5 {
     font-weight: bold;
     margin-bottom: 1.5rem;
+    color: #1a1a2e;
 }
 
-.form-control:focus {
+.login-card .form-label {
+    color: #1a1a2e;
+}
+
+.login-card .form-control {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #1a1a2e;
+}
+
+.login-card .form-control:focus {
+    background-color: white;
     border-color: #0f3460;
-    box-shadow: 0 0 0 0.2rem rgba(15, 52, 96, 0.2);
+    color: #1a1a2e;
+    box-shadow: 0 0 0 0.2rem rgba(15,52,96,0.2);
+}
+
+.login-card a {
+    color: #0f3460;
 }
 
 .btn-login {
@@ -118,6 +142,7 @@ body {
 .footer {
     background-color: #0a0f1a !important;
     color: #495057 !important;
+    border-top: 1px solid rgba(255,255,255,0.05) !important;
 }
 
 .footer strong {

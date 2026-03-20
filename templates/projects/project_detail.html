@@ -3,41 +3,59 @@
 
 {% block content %}
 <div style="max-width: 700px; margin: 0 auto;">
-    <a href="{% url 'project_list' %}" class="text-muted small">← Volver a mis proyectos</a>
+    <a href="{% url 'project_list' %}" class="text-muted small">Volver a mis proyectos</a>
     <h2 class="mt-2 mb-4">{{ project.name }}</h2>
 
     <div class="card border-0 shadow-sm mb-3">
         <div class="card-body">
-            <p><strong>Descripción:</strong> {{ project.description|default:"Sin descripción" }}</p>
+            <p><strong>Descripcion:</strong> {{ project.description|default:"Sin descripcion" }}</p>
             <p><strong>Archivo:</strong> {{ project.file.name }} ({{ project.get_file_size_kb }} KB)</p>
             <p><strong>Fecha de subida:</strong> {{ project.created_at|date:"d/m/Y H:i" }}</p>
-            <p>
+            <p class="mb-0">
                 <strong>Estado:</strong>
-                {% if project.status == 'pending' %}<span
-                    class="badge bg-warning text-dark">Pendiente de análisis</span>
-                {% elif project.status == 'analyzed' %}<span class="badge bg-success">Analizado</span>
-                {% else %}<span class="badge bg-danger">Error en análisis</span>{% endif %}
+                {% if project.status == 'pending' %}
+                    <span class="badge bg-warning text-dark">Pendiente de analisis</span>
+                {% elif project.status == 'analyzed' %}
+                    <span class="badge bg-success">Analizado</span>
+                {% else %}
+                    <span class="badge bg-danger">Error en analisis</span>
+                {% endif %}
             </p>
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm border-start border-primary border-3 mb-3">
+    <div class="card border-0 shadow-sm mb-3" style="border-left: 4px solid #4a7fc1 !important;">
         <div class="card-body">
-            <h5 class="card-title">Análisis de seguridad</h5>
-            <p class="card-text text-muted">
-                Ejecuta el motor de análisis para detectar vulnerabilidades y obtener un score de seguridad.
+            <h5 class="card-title">Analisis de seguridad</h5>
+            <p class="card-text">
+                Selecciona el nivel de analisis y ejecuta el motor para detectar
+                vulnerabilidades en tu proyecto.
             </p>
             <form method="post" action="{% url 'analisis_ejecutar' project.pk %}">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-primary">Analizar proyecto</button>
-                {% if project.status == 'analyzed' %}
-                <a href="{% url 'analisis_historial' project.pk %}" class="btn btn-outline-secondary ms-2">Ver
-                    historial</a>
-                {% endif %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Nivel de analisis</label>
+                    <select name="nivel" class="form-select">
+                        <option value="BASICO">Basico — SQL Injection, XSS, configuraciones inseguras</option>
+                        <option value="INTERMEDIO">Intermedio — Basico + eval/exec, deserializacion, credenciales en comentarios</option>
+                        <option value="AVANZADO">Avanzado — Todo lo anterior + hash debiles, CORS, open redirect, dependencias</option>
+                    </select>
+                    <div class="form-text">
+                        El nivel Avanzado incluye todas las reglas de los niveles anteriores.
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <button type="submit" class="btn btn-primary">Analizar proyecto</button>
+                    {% if project.status == 'analyzed' %}
+                        <a href="{% url 'analisis_historial' project.pk %}" class="btn btn-outline-secondary">Ver historial</a>
+                    {% endif %}
+                </div>
             </form>
         </div>
     </div>
 
-    <a href="{% url 'project_delete' project.pk %}" class="btn btn-outline-danger btn-sm">Eliminar proyecto</a>
+    <a href="{% url 'project_delete' project.pk %}" class="btn btn-outline-danger btn-sm">
+        Eliminar proyecto
+    </a>
 </div>
 {% endblock %}
