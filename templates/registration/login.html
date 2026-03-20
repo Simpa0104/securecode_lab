@@ -1,21 +1,206 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<title>Login</title>
-</head>
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}SecureCode Lab — Iniciar sesión{% endblock %}
 
-<body>
+{% block navbar %}{% endblock %}
 
-<h2>SecureCode Lab Login</h2>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
 
-<form method="post">
-{% csrf_token %}
+{% block content %}
+<!-- LOGO -->
+<div class="text-center mb-4">
+    <span style="font-size:1.4rem; font-weight:bold; color:white; margin-left:8px;">SecureCode Lab</span>
+    <p style="color:#6c757d; font-size:0.85rem; margin-top:4px;">
+        Plataforma educativa de análisis estático de seguridad
+    </p>
+</div>
 
-{{ form.as_p }}
+<div class="row align-items-center justify-content-center g-4">
 
-<button type="submit">Iniciar sesión</button>
+    <!-- CARRUSEL -->
+    <div class="col-lg-6">
+        <div class="carousel-section">
+            <div class="owasp-badge">OWASP Top 10 — 2021</div>
 
-</form>
+            <div id="owaspCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4500">
 
-</body>
-</html>
+                <div class="carousel-indicators">
+                    <button type="button" data-bs-target="#owaspCarousel" data-bs-slide-to="0" class="active"></button>
+                    <button type="button" data-bs-target="#owaspCarousel" data-bs-slide-to="1"></button>
+                    <button type="button" data-bs-target="#owaspCarousel" data-bs-slide-to="2"></button>
+                    <button type="button" data-bs-target="#owaspCarousel" data-bs-slide-to="3"></button>
+                    <button type="button" data-bs-target="#owaspCarousel" data-bs-slide-to="4"></button>
+                    <button type="button" data-bs-target="#owaspCarousel" data-bs-slide-to="5"></button>
+                    <button type="button" data-bs-target="#owaspCarousel" data-bs-slide-to="6"></button>
+                    <button type="button" data-bs-target="#owaspCarousel" data-bs-slide-to="7"></button>
+                    <button type="button" data-bs-target="#owaspCarousel" data-bs-slide-to="8"></button>
+                    <button type="button" data-bs-target="#owaspCarousel" data-bs-slide-to="9"></button>
+                    <button type="button" data-bs-target="#owaspCarousel" data-bs-slide-to="10"></button>
+                </div>
+
+                <div class="carousel-inner pb-4">
+
+                    <!-- SLIDE 0: SecureCode Lab -->
+                    <div class="carousel-item active">
+                        <h3>Bienvenido a SecureCode Lab</h3>
+                        <p>Plataforma web educativa diseñada para que estudiantes de sistemas analicen automáticamente
+                            vulnerabilidades de seguridad en sus proyectos académicos y reciban retroalimentación
+                            práctica.</p>
+                        <div class="mt-3">
+                            <span class="feature-pill">Análisis automático</span>
+                            <span class="feature-pill">Score de seguridad</span>
+                            <span class="feature-pill">Recomendaciones</span>
+                            <span class="feature-pill">Basado en OWASP</span>
+                        </div>
+                        <div class="severity-bar mt-3">
+                            <div class="severity-fill" style="width:100%"></div>
+                        </div>
+                        <div class="severity-label">Tecnológico de Antioquia — 2026</div>
+                    </div>
+
+                    <!-- SLIDES OWASP Top 10 -->
+                    <div class="carousel-item">
+                        <h3>A01 — Control de Acceso Roto</h3>
+                        <p>Las restricciones sobre lo que los usuarios autenticados pueden hacer no se aplican
+                            correctamente. Los atacantes pueden acceder a datos o funciones no autorizadas.</p>
+                        <div class="severity-bar">
+                            <div class="severity-fill" style="width:94%"></div>
+                        </div>
+                        <div class="severity-label">Incidencia: 94% de aplicaciones probadas</div>
+                    </div>
+
+                    <div class="carousel-item">
+                        <h3>A02 — Fallos Criptográficos</h3>
+                        <p>Contraseñas en texto plano, algoritmos débiles como MD5 o transmisión sin cifrado exponen
+                            información sensible de usuarios y sistemas.</p>
+                        <div class="severity-bar">
+                            <div class="severity-fill" style="width:70%"></div>
+                        </div>
+                        <div class="severity-label">Anteriormente: Exposición de Datos Sensibles</div>
+                    </div>
+
+                    <div class="carousel-item">
+                        <h3>A03 — Inyección</h3>
+                        <p>SQL Injection, XSS y otras inyecciones ocurren cuando datos no confiables se envían a un
+                            intérprete. Un atacante puede robar datos o tomar control del sistema.</p>
+                        <div class="severity-bar">
+                            <div class="severity-fill" style="width:80%"></div>
+                        </div>
+                        <div class="severity-label">Incluye SQL, NoSQL, OS y LDAP Injection</div>
+                    </div>
+
+                    <div class="carousel-item">
+                        <h3>A04 — Diseño Inseguro</h3>
+                        <p>Riesgos por fallas de diseño y arquitectura. La seguridad debe integrarse desde el inicio del
+                            desarrollo, no agregarse como parche al final.</p>
+                        <div class="severity-bar">
+                            <div class="severity-fill" style="width:55%"></div>
+                        </div>
+                        <div class="severity-label">Nueva categoría en OWASP 2021</div>
+                    </div>
+
+                    <div class="carousel-item">
+                        <h3>A05 — Configuración Incorrecta</h3>
+                        <p>DEBUG activo en producción, credenciales por defecto o mensajes de error detallados. El 90%
+                            de las aplicaciones tienen alguna configuración insegura.</p>
+                        <div class="severity-bar">
+                            <div class="severity-fill" style="width:90%"></div>
+                        </div>
+                        <div class="severity-label">Incidencia: 90% de aplicaciones</div>
+                    </div>
+
+                    <div class="carousel-item">
+                        <h3>A06 — Componentes Vulnerables</h3>
+                        <p>Usar librerías o frameworks con vulnerabilidades conocidas. Si no sabes las versiones exactas
+                            que usas, probablemente estás usando algo vulnerable.</p>
+                        <div class="severity-bar">
+                            <div class="severity-fill" style="width:60%"></div>
+                        </div>
+                        <div class="severity-label">Difícil de probar, fácil de prevenir</div>
+                    </div>
+
+                    <div class="carousel-item">
+                        <h3>A07 — Fallos de Autenticación</h3>
+                        <p>Contraseñas débiles, sesiones mal gestionadas o falta de autenticación multifactor permiten a
+                            atacantes asumir la identidad de otros usuarios.</p>
+                        <div class="severity-bar">
+                            <div class="severity-fill" style="width:65%"></div>
+                        </div>
+                        <div class="severity-label">Anteriormente: Autenticación Rota</div>
+                    </div>
+
+                    <div class="carousel-item">
+                        <h3>A08 — Fallos de Integridad</h3>
+                        <p>Código o infraestructura que no protege contra modificaciones no autorizadas. Incluye
+                            dependencias de fuentes no confiables o pipelines CI/CD sin validación.</p>
+                        <div class="severity-bar">
+                            <div class="severity-fill" style="width:45%"></div>
+                        </div>
+                        <div class="severity-label">Nueva categoría en OWASP 2021</div>
+                    </div>
+
+                    <div class="carousel-item">
+                        <h3>A09 — Fallos en Monitoreo</h3>
+                        <p>Sin logs adecuados, los ataques no se detectan a tiempo. El promedio de detección de una
+                            brecha sin monitoreo apropiado es de 200 días.</p>
+                        <div class="severity-bar">
+                            <div class="severity-fill" style="width:50%"></div>
+                        </div>
+                        <div class="severity-label">Promedio de detección sin monitoreo: 200 días</div>
+                    </div>
+
+                    <div class="carousel-item">
+                        <h3>A10 — SSRF</h3>
+                        <p>La Falsificación de Solicitudes del Lado del Servidor ocurre cuando una app obtiene recursos
+                            sin validar la URL. Permite acceder a servicios internos o metadatos de cloud.</p>
+                        <div class="severity-bar">
+                            <div class="severity-fill" style="width:40%"></div>
+                        </div>
+                        <div class="severity-label">Nueva categoría en OWASP 2021</div>
+                    </div>
+
+                </div>
+
+                <button class="carousel-control-prev" type="button" data-bs-target="#owaspCarousel"
+                        data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#owaspCarousel"
+                        data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FORMULARIO LOGIN -->
+    <div class="col-lg-4 col-md-6">
+        <div class="login-card">
+            <h5 class="text-center">Iniciar sesión</h5>
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">{{ field.label }}</label>
+                    <input type="{{ field.field.widget.input_type }}"
+                           name="{{ field.html_name }}"
+                           class="form-control {% if field.errors %}is-invalid{% endif %}"
+                           {% if field.value %}value="{{ field.value }}" {% endif %}>
+                    {% for error in field.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-login w-100 mt-2">Entrar</button>
+            </form>
+            <hr class="my-3">
+            <p class="text-center text-muted small mb-0">
+                ¿No tienes cuenta? <a href="{% url 'register' %}">Regístrate aquí</a>
+            </p>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

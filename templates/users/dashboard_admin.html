@@ -1,146 +1,118 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Panel Admin - SecureCode Lab</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #f8f9fa; }
-        .stat-card { border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-        .stat-number { font-size: 2rem; font-weight: bold; }
-    </style>
-</head>
-<body>
+{% extends 'base.html' %}
+{% block title %}Panel Admin - SecureCode Lab{% endblock %}
 
-<!-- NAVBAR -->
-<nav class="navbar navbar-dark bg-dark px-4">
-    <span class="navbar-brand">SecureCode Lab</span>
-    <div class="d-flex align-items-center gap-3">
-        <span class="badge bg-danger">ADMIN</span>
-        <span class="text-light small">Bienvenido {{ user.username }}</span>
-        <form method="post" action="/accounts/logout/" class="m-0">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-outline-light btn-sm">Cerrar sesión</button>
-        </form>
-    </div>
-</nav>
-
-<div class="container mt-4">
-
-    <div class="mb-4">
-        <h3>Panel de Administración</h3>
-        <p class="text-muted">Vista general del sistema SecureCode Lab.</p>
-    </div>
-
-    <!-- ESTADÍSTICAS GLOBALES -->
-    <div class="row mb-4">
-        <div class="col-md-4 mb-3">
-            <div class="card stat-card text-center p-3">
-                <div class="stat-number text-primary">{{ total_usuarios }}</div>
-                <div class="text-muted">Usuarios registrados</div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="card stat-card text-center p-3">
-                <div class="stat-number text-success">{{ total_proyectos }}</div>
-                <div class="text-muted">Proyectos en el sistema</div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="card stat-card text-center p-3">
-                <div class="stat-number text-warning">{{ total_analisis }}</div>
-                <div class="text-muted">Análisis ejecutados</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-
-        <!-- USUARIOS RECIENTES -->
-        <div class="col-md-5 mb-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <strong>Usuarios recientes</strong>
-                </div>
-                <div class="card-body p-0">
-                    {% if usuarios_recientes %}
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Usuario</th>
-                                <th>Rol</th>
-                                <th>Registro</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for u in usuarios_recientes %}
-                            <tr>
-                                <td>{{ u.username }}</td>
-                                <td>
-                                    {% if u.profile.role == 'admin' %}
-                                        <span class="badge bg-danger">Admin</span>
-                                    {% else %}
-                                        <span class="badge bg-secondary">Estudiante</span>
-                                    {% endif %}
-                                </td>
-                                <td><small>{{ u.date_joined|date:"d/m/Y" }}</small></td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                        <div class="text-center py-3 text-muted">Sin usuarios.</div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <!-- ÚLTIMOS ANÁLISIS DEL SISTEMA -->
-        <div class="col-md-7 mb-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <strong>Últimos análisis del sistema</strong>
-                </div>
-                <div class="card-body p-0">
-                    {% if ultimos_analisis %}
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Proyecto</th>
-                                <th>Usuario</th>
-                                <th>Score</th>
-                                <th>Fecha</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for analisis in ultimos_analisis %}
-                            <tr>
-                                <td>{{ analisis.project.name }}</td>
-                                <td><small>{{ analisis.project.user.username }}</small></td>
-                                <td>
-                                    <span class="badge {% if analisis.score >= 80 %}bg-success{% elif analisis.score >= 60 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
-                                        {{ analisis.score }}/100
-                                    </span>
-                                </td>
-                                <td><small>{{ analisis.fecha|date:"d/m/Y H:i" }}</small></td>
-                                <td>
-                                    <a href="{% url 'analisis_resultado' analisis.pk %}" class="btn btn-xs btn-outline-primary" style="font-size:0.75rem; padding: 2px 8px;">Ver</a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                        <div class="text-center py-3 text-muted">Sin análisis aún.</div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="mb-0">Panel de Administracion</h3>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <div style="font-size:2rem; font-weight:bold;" class="text-primary">{{ total_usuarios }}</div>
+            <div class="text-muted">Usuarios registrados</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <div style="font-size:2rem; font-weight:bold;" class="text-success">{{ total_proyectos }}</div>
+            <div class="text-muted">Proyectos en el sistema</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <div style="font-size:2rem; font-weight:bold;" class="text-warning">{{ total_analisis }}</div>
+            <div class="text-muted">Analisis ejecutados</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-5 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <strong>Usuarios recientes</strong>
+                <a href="{% url 'gestion_usuarios' %}" class="btn btn-sm btn-outline-primary">Ver todos</a>
+            </div>
+            <div class="card-body p-0">
+                {% if usuarios_recientes %}
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Rol</th>
+                        <th>Registro</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for u in usuarios_recientes %}
+                    <tr>
+                        <td>{{ u.username }}</td>
+                        <td>
+                            {% if u.is_superuser %}
+                            <span class="badge bg-danger">Superusuario</span>
+                            {% elif u.profile.role == 'admin' %}
+                            <span class="badge bg-danger">Admin</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Estudiante</span>
+                            {% endif %}
+                        </td>
+                        <td><small>{{ u.date_joined|date:"d/m/Y" }}</small></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-3 text-muted">Sin usuarios.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <strong>Ultimos analisis del sistema</strong>
+            </div>
+            <div class="card-body p-0">
+                {% if ultimos_analisis %}
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Proyecto</th>
+                        <th>Usuario</th>
+                        <th>Score</th>
+                        <th>Fecha</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for analisis in ultimos_analisis %}
+                    <tr>
+                        <td>{{ analisis.project.name }}</td>
+                        <td><small>{{ analisis.project.user.username }}</small></td>
+                        <td>
+                                <span class="badge {% if analisis.score >= 80 %}bg-success{% elif analisis.score >= 60 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                    {{ analisis.score }}/100
+                                </span>
+                        </td>
+                        <td><small>{{ analisis.fecha|date:"d/m/Y H:i" }}</small></td>
+                        <td>
+                            <a href="{% url 'analisis_resultado' analisis.pk %}"
+                               class="btn btn-outline-primary"
+                               style="font-size:0.75rem; padding:2px 8px;">Ver</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-3 text-muted">Sin analisis aun.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

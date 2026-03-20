@@ -17,11 +17,11 @@ RULES = [
             'cursor.execute("SELECT * FROM users WHERE id = %s", [user_id])'
         ),
         'patrones': [
-            r'execute\s*\(\s*["\'].*%s.*["\'].*%.*\)',   # cursor.execute("... %s" % var)
-            r'execute\s*\(\s*f["\']',                     # cursor.execute(f"...")
-            r'execute\s*\(\s*["\'].*\+',                  # cursor.execute("..." + var)
-            r'raw\s*\(\s*f["\']',                         # Model.objects.raw(f"...")
-            r'raw\s*\(\s*["\'].*\+',                      # Model.objects.raw("..." + var)
+            r'execute\s*\(\s*["\'].*%s.*["\'].*%.*\)',  # cursor.execute("... %s" % var)
+            r'execute\s*\(\s*f["\']',  # cursor.execute(f"...")
+            r'execute\s*\(\s*["\'].*\+',  # cursor.execute("..." + var)
+            r'raw\s*\(\s*f["\']',  # Model.objects.raw(f"...")
+            r'raw\s*\(\s*["\'].*\+',  # Model.objects.raw("..." + var)
         ],
     },
     {
@@ -35,10 +35,10 @@ RULES = [
             'integrado con set_password() y check_password() en el modelo User.'
         ),
         'patrones': [
-            r'password\s*=\s*["\'][^"\']{3,}["\']',      # password = "algo"
-            r'password\s*==\s*request\.',                  # password == request.POST[...]
-            r'passwd\s*=\s*["\']',                         # passwd = "algo"
-            r'\.password\s*=\s*request\.',                 # user.password = request.POST
+            r'password\s*=\s*["\'][^"\']{3,}["\']',  # password = "algo"
+            r'password\s*==\s*request\.',  # password == request.POST[...]
+            r'passwd\s*=\s*["\']',  # passwd = "algo"
+            r'\.password\s*=\s*request\.',  # user.password = request.POST
         ],
     },
     {
@@ -66,7 +66,7 @@ RULES = [
             'SECRET_KEY = os.environ.get("SECRET_KEY")'
         ),
         'patrones': [
-            r'SECRET_KEY\s*=\s*["\'][^"\']{10,}["\']',   # SECRET_KEY = "valor-largo"
+            r'SECRET_KEY\s*=\s*["\'][^"\']{10,}["\']',  # SECRET_KEY = "valor-largo"
         ],
     },
     {
@@ -80,8 +80,8 @@ RULES = [
             'o asegúrate de que el contenido es 100% controlado por el sistema.'
         ),
         'patrones': [
-            r'mark_safe\s*\(',                             # mark_safe(variable)
-            r'\|\s*safe',                                  # {{ variable | safe }}
+            r'mark_safe\s*\(',  # mark_safe(variable)
+            r'\|\s*safe',  # {{ variable | safe }}
         ],
     },
     {
@@ -147,7 +147,6 @@ RULES = [
 # FUNCIONES DEL MOTOR
 
 def analizar_contenido(codigo, nombre_archivo):
-
     vulnerabilidades = []
     lineas = codigo.splitlines()
 
@@ -187,7 +186,6 @@ def analizar_archivo_py(ruta_archivo, nombre_mostrar=None):
 
 
 def analizar_zip(ruta_zip):
-
     vulnerabilidades = []
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -218,7 +216,6 @@ def analizar_zip(ruta_zip):
 
 
 def calcular_score(vulnerabilidades):
-
     PENALIZACIONES = {
         'CRITICA': 25,
         'ALTA': 15,
@@ -234,7 +231,6 @@ def calcular_score(vulnerabilidades):
 
 
 def obtener_nivel_score(score):
-
     if score >= 80:
         return {'etiqueta': 'Seguro', 'color': 'success'}
     elif score >= 60:
@@ -246,7 +242,6 @@ def obtener_nivel_score(score):
 
 
 def ejecutar_analisis(proyecto):
-
     ruta = proyecto.file.path
     extension = os.path.splitext(ruta)[1].lower()
 

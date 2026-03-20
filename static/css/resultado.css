@@ -1,0 +1,71 @@
+/* ─────────────────────────────────────────
+   resultado.css — Estilos del reporte de análisis
+   ───────────────────────────────────────── */
+
+/* CÍRCULO DEL SCORE */
+.score-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: white;
+    margin: 0 auto;
+}
+
+/* TARJETAS DE VULNERABILIDADES */
+.vuln-card {
+    border-left: 4px solid;
+    margin-bottom: 1rem;
+}
+
+.vuln-CRITICA {
+    border-color: #212529;
+}
+
+.vuln-ALTA {
+    border-color: #dc3545;
+}
+
+.vuln-MEDIA {
+    border-color: #ffc107;
+}
+
+.vuln-BAJA {
+    border-color: #6c757d;
+}
+
+/* BADGES DE SEVERIDAD */
+.badge-CRITICA {
+    background-color: #212529;
+    color: white;
+}
+
+.badge-ALTA {
+    background-color: #dc3545;
+    color: white;
+}
+
+.badge-MEDIA {
+    background-color: #ffc107;
+    color: black;
+}
+
+.badge-BAJA {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* FRAGMENTO DE CÓDIGO */
+.code-snippet {
+    background: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.85rem;
+    word-break: break-all;
+}

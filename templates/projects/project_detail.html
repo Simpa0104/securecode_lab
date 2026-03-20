@@ -1,78 +1,43 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ project.name }} - SecureCode Lab</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-<nav class="navbar navbar-dark bg-dark px-4">
-    <span class="navbar-brand">SecureCode Lab</span>
-    <div>
-        <span class="text-light me-3">{{ user.username }}</span>
-        <a href="/accounts/logout/" class="btn btn-outline-light btn-sm">Cerrar sesión</a>
-    </div>
-</nav>
+{% extends 'base.html' %}
+{% block title %}{{ project.name }} - SecureCode Lab{% endblock %}
 
-<div class="container mt-4" style="max-width: 700px;">
-
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
-
+{% block content %}
+<div style="max-width: 700px; margin: 0 auto;">
     <a href="{% url 'project_list' %}" class="text-muted small">← Volver a mis proyectos</a>
     <h2 class="mt-2 mb-4">{{ project.name }}</h2>
 
-    <div class="card mb-3">
+    <div class="card border-0 shadow-sm mb-3">
         <div class="card-body">
             <p><strong>Descripción:</strong> {{ project.description|default:"Sin descripción" }}</p>
             <p><strong>Archivo:</strong> {{ project.file.name }} ({{ project.get_file_size_kb }} KB)</p>
             <p><strong>Fecha de subida:</strong> {{ project.created_at|date:"d/m/Y H:i" }}</p>
             <p>
                 <strong>Estado:</strong>
-                {% if project.status == 'pending' %}
-                    <span class="badge bg-warning text-dark">Pendiente de análisis</span>
-                {% elif project.status == 'analyzed' %}
-                    <span class="badge bg-success">Analizado</span>
-                {% else %}
-                    <span class="badge bg-danger">Error en análisis</span>
-                {% endif %}
+                {% if project.status == 'pending' %}<span
+                    class="badge bg-warning text-dark">Pendiente de análisis</span>
+                {% elif project.status == 'analyzed' %}<span class="badge bg-success">Analizado</span>
+                {% else %}<span class="badge bg-danger">Error en análisis</span>{% endif %}
             </p>
         </div>
     </div>
 
-    <!-- BOTÓN ANALIZAR -->
-    <div class="card mb-3 border-primary">
+    <div class="card border-0 shadow-sm border-start border-primary border-3 mb-3">
         <div class="card-body">
             <h5 class="card-title">Análisis de seguridad</h5>
             <p class="card-text text-muted">
-                Ejecuta el motor de análisis para detectar vulnerabilidades en tu proyecto
-                y obtener un score de seguridad con recomendaciones de mejora.
+                Ejecuta el motor de análisis para detectar vulnerabilidades y obtener un score de seguridad.
             </p>
             <form method="post" action="{% url 'analisis_ejecutar' project.pk %}">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-primary">
-                    Analizar proyecto
-                </button>
+                <button type="submit" class="btn btn-primary">Analizar proyecto</button>
                 {% if project.status == 'analyzed' %}
-                <a href="{% url 'analisis_historial' project.pk %}" class="btn btn-outline-secondary ms-2">
-                    Ver historial
-                </a>
+                <a href="{% url 'analisis_historial' project.pk %}" class="btn btn-outline-secondary ms-2">Ver
+                    historial</a>
                 {% endif %}
             </form>
         </div>
     </div>
 
-    <a href="{% url 'project_delete' project.pk %}" class="btn btn-outline-danger btn-sm">
-        Eliminar proyecto
-    </a>
-
+    <a href="{% url 'project_delete' project.pk %}" class="btn btn-outline-danger btn-sm">Eliminar proyecto</a>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% endblock %}

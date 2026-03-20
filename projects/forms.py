@@ -1,15 +1,14 @@
 from django import forms
 from .models import Project
 
-# Extensiones permitidas (RF-5: validar tipo de archivo)
+# Extensiones permitidas:
 ALLOWED_EXTENSIONS = ['.zip', '.py', '.js', '.php', '.java', '.html', '.ts']
 
-# Tamaño máximo: 5 MB (RNF-2)
+# Tamaño máximo: 5 MB
 MAX_FILE_SIZE = 5 * 1024 * 1024
 
 
 class ProjectForm(forms.ModelForm):
-
     class Meta:
         model = Project
         fields = ('name', 'description', 'file')
@@ -42,14 +41,14 @@ class ProjectForm(forms.ModelForm):
         if not file:
             raise forms.ValidationError('Debes seleccionar un archivo.')
 
-        # Validar tamaño (RNF-9)
+        # Validar tamaño
         if file.size > MAX_FILE_SIZE:
             raise forms.ValidationError(
                 f'El archivo supera el tamaño máximo permitido de 5 MB. '
                 f'Tu archivo pesa {round(file.size / 1024 / 1024, 2)} MB.'
             )
 
-        # Validar extensión (RNF-9)
+        # Validar extensión
         import os
         _, ext = os.path.splitext(file.name)
         if ext.lower() not in ALLOWED_EXTENSIONS:

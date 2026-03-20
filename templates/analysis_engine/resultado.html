@@ -1,157 +1,111 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Resultado del Análisis - SecureCode Lab</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .score-circle {
-            width: 140px; height: 140px;
-            border-radius: 50%;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            font-size: 2.5rem; font-weight: bold;
-            color: white; margin: 0 auto;
-        }
-        .badge-CRITICA { background-color: #212529; color: white; }
-        .badge-ALTA    { background-color: #dc3545; color: white; }
-        .badge-MEDIA   { background-color: #ffc107; color: black; }
-        .badge-BAJA    { background-color: #6c757d; color: white; }
-        .vuln-card { border-left: 4px solid; margin-bottom: 1rem; }
-        .vuln-CRITICA { border-color: #212529; }
-        .vuln-ALTA    { border-color: #dc3545; }
-        .vuln-MEDIA   { border-color: #ffc107; }
-        .vuln-BAJA    { border-color: #6c757d; }
-        .code-snippet { background: #f8f9fa; padding: 8px 12px; border-radius: 4px;
-                        font-family: monospace; font-size: 0.85rem; word-break: break-all; }
-    </style>
-</head>
-<body>
-<nav class="navbar navbar-dark bg-dark px-4">
-    <span class="navbar-brand">SecureCode Lab</span>
-    <div class="d-flex align-items-center gap-3">
-        <span class="text-light small">{{ user.username }}</span>
-        <form method="post" action="/accounts/logout/" class="m-0">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-outline-light btn-sm">Cerrar sesión</button>
-        </form>
-    </div>
-</nav>
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Reporte de Seguridad - SecureCode Lab{% endblock %}
 
-<div class="container mt-4">
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/resultado.css' %}">
+{% endblock %}
 
-    <!-- NAVEGACIÓN ADAPTADA POR ROL -->
+{% block content %}
+{% if user.is_superuser or user.profile.role == 'admin' %}
+<a href="{% url 'dashboard_admin' %}" class="text-muted small">Volver al dashboard</a>
+{% else %}
+<a href="{% url 'project_detail' analisis.project.pk %}" class="text-muted small">Volver al proyecto</a>
+{% endif %}
+
+<h2 class="mt-2 mb-1">Reporte de Seguridad</h2>
+<p class="text-muted mb-4">
+    {{ analisis.project.name }}
     {% if user.is_superuser or user.profile.role == 'admin' %}
-        <a href="{% url 'dashboard_admin' %}" class="text-muted small">← Volver al dashboard</a>
-    {% else %}
-        <a href="{% url 'project_detail' analisis.project.pk %}" class="text-muted small">← Volver al proyecto</a>
+    <span class="text-muted small">— Usuario: {{ analisis.project.user.username }}</span>
     {% endif %}
+    — {{ analisis.fecha|date:"d/m/Y H:i" }}
+</p>
 
-    <h2 class="mt-2 mb-1">Reporte de Seguridad</h2>
-    <p class="text-muted mb-4">
-        {{ analisis.project.name }}
-        {% if user.is_superuser or user.profile.role == 'admin' %}
-            <span class="text-muted small">— Usuario: {{ analisis.project.user.username }}</span>
-        {% endif %}
-        — {{ analisis.fecha|date:"d/m/Y H:i" }}
-    </p>
-
-    <!-- SCORE Y RESUMEN -->
-    <div class="row mb-4">
-        <div class="col-md-3 text-center">
-            <div class="score-circle bg-{{ nivel_color }}">
-                {{ analisis.score }}
-                <span style="font-size:0.9rem; font-weight:normal;">/ 100</span>
-            </div>
-            <h5 class="mt-2">{{ nivel_texto }}</h5>
+<div class="row mb-4">
+    <div class="col-md-3 text-center">
+        <div class="score-circle bg-{{ nivel_color }}">
+            {{ analisis.score }}
+            <span style="font-size:0.9rem; font-weight:normal;">/ 100</span>
         </div>
-        <div class="col-md-9">
-            <div class="row text-center">
-                <div class="col-3">
-                    <div class="card border-dark">
-                        <div class="card-body py-3">
-                            <h3 class="mb-0 text-dark">{{ resumen.criticas }}</h3>
-                            <small class="text-muted">Críticas</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-3">
-                    <div class="card border-danger">
-                        <div class="card-body py-3">
-                            <h3 class="mb-0 text-danger">{{ resumen.altas }}</h3>
-                            <small class="text-muted">Altas</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-3">
-                    <div class="card border-warning">
-                        <div class="card-body py-3">
-                            <h3 class="mb-0 text-warning">{{ resumen.medias }}</h3>
-                            <small class="text-muted">Medias</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-3">
-                    <div class="card border-secondary">
-                        <div class="card-body py-3">
-                            <h3 class="mb-0 text-secondary">{{ resumen.bajas }}</h3>
-                            <small class="text-muted">Bajas</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <p class="mt-3 text-muted">
-                Se encontraron <strong>{{ vulnerabilidades|length }} vulnerabilidades</strong>
-                en total. Revisa cada una y aplica las recomendaciones indicadas.
-            </p>
-        </div>
+        <h5 class="mt-2">{{ nivel_texto }}</h5>
     </div>
-
-    <hr>
-
-    <!-- LISTA DE VULNERABILIDADES -->
-    {% if vulnerabilidades %}
-        <h4 class="mb-3">Vulnerabilidades encontradas</h4>
-
-        {% for vuln in vulnerabilidades %}
-        <div class="card vuln-card vuln-{{ vuln.severidad }}">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <span class="badge badge-{{ vuln.severidad }} me-2">{{ vuln.severidad }}</span>
-                        <strong>{{ vuln.nombre }}</strong>
-                        <span class="text-muted small ms-2">[{{ vuln.regla_id }}]</span>
+    <div class="col-md-9">
+        <div class="row text-center">
+            <div class="col-3">
+                <div class="card border-dark">
+                    <div class="card-body py-3">
+                        <h3 class="mb-0 text-dark">{{ resumen.criticas }}</h3>
+                        <small class="text-muted">Criticas</small>
                     </div>
-                    <small class="text-muted">{{ vuln.archivo }} — línea {{ vuln.linea }}</small>
                 </div>
-
-                <p class="mt-2 mb-1">{{ vuln.descripcion }}</p>
-
-                {% if vuln.codigo_linea %}
-                <div class="code-snippet mb-2">{{ vuln.codigo_linea }}</div>
-                {% endif %}
-
-                <div class="alert alert-light py-2 mb-0 mt-2">
-                    <strong>Recomendación:</strong> {{ vuln.recomendacion }}
+            </div>
+            <div class="col-3">
+                <div class="card border-danger">
+                    <div class="card-body py-3">
+                        <h3 class="mb-0 text-danger">{{ resumen.altas }}</h3>
+                        <small class="text-muted">Altas</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="card border-warning">
+                    <div class="card-body py-3">
+                        <h3 class="mb-0 text-warning">{{ resumen.medias }}</h3>
+                        <small class="text-muted">Medias</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="card border-secondary">
+                    <div class="card-body py-3">
+                        <h3 class="mb-0 text-secondary">{{ resumen.bajas }}</h3>
+                        <small class="text-muted">Bajas</small>
+                    </div>
                 </div>
             </div>
         </div>
-        {% endfor %}
-
-    {% else %}
-        <div class="alert alert-success text-center py-4">
-            <h4>¡Sin vulnerabilidades detectadas!</h4>
-            <p class="mb-0">El análisis no encontró patrones inseguros en tu proyecto. ¡Buen trabajo!</p>
-        </div>
-    {% endif %}
-
-    <div class="mt-4 mb-5">
-        <a href="{% url 'analisis_historial' analisis.project.pk %}" class="btn btn-outline-secondary">
-            Ver historial de análisis
-        </a>
+        <p class="mt-3 text-muted">
+            Se encontraron <strong>{{ vulnerabilidades|length }} vulnerabilidades</strong> en total.
+        </p>
     </div>
-
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+
+<hr>
+
+{% if vulnerabilidades %}
+<h4 class="mb-3">Vulnerabilidades encontradas</h4>
+{% for vuln in vulnerabilidades %}
+<div class="card vuln-card vuln-{{ vuln.severidad }}">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <span class="badge badge-{{ vuln.severidad }} me-2">{{ vuln.severidad }}</span>
+                <strong>{{ vuln.nombre }}</strong>
+                <span class="text-muted small ms-2">[{{ vuln.regla_id }}]</span>
+            </div>
+            <small class="text-muted">{{ vuln.archivo }} — linea {{ vuln.linea }}</small>
+        </div>
+        <p class="mt-2 mb-1">{{ vuln.descripcion }}</p>
+        {% if vuln.codigo_linea %}
+        <div class="code-snippet mb-2">{{ vuln.codigo_linea }}</div>
+        {% endif %}
+        <div class="alert alert-light py-2 mb-0 mt-2">
+            <strong>Recomendacion:</strong> {{ vuln.recomendacion }}
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="alert alert-success text-center py-4">
+    <h4>Sin vulnerabilidades detectadas</h4>
+    <p class="mb-0">El analisis no encontro patrones inseguros. Buen trabajo.</p>
+</div>
+{% endif %}
+
+<div class="mt-4 mb-2">
+    <a href="{% url 'analisis_historial' analisis.project.pk %}" class="btn btn-outline-secondary">
+        Ver historial de analisis
+    </a>
+</div>
+{% endblock %}

@@ -1,19 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Registro</title>
-</head>
-<body>
-<h2>Registro</h2>
+{% extends 'base.html' %}
+{% block title %}Registro - SecureCode Lab{% endblock %}
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
+{% block navbar %}{% endblock %}
 
-    <button type="submit">Registrarse</button>
-</form>
+{% block content %}
+<div style="max-width: 450px; margin: 2rem auto;">
+    <div class="text-center mb-4">
+        <h4 class="mt-2">Crear cuenta en SecureCode Lab</h4>
+        <p class="text-muted small">Plataforma educativa de análisis de seguridad</p>
+    </div>
 
-<a href="{% url 'login' %}">Iniciar sesión</a>
-</body>
-</html>
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                    <div class="form-text">{{ field.help_text }}</div>
+                    {% endif %}
+                    {% for error in field.errors %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-dark w-100 mt-2">Registrarse</button>
+            </form>
+            <hr>
+            <p class="text-center text-muted small mb-0">
+                ¿Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesión</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

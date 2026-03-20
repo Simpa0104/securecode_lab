@@ -3,7 +3,6 @@ from projects.models import Project
 
 
 class Analisis(models.Model):
-
     NIVEL_CHOICES = (
         ('BASICO', 'Básico'),
         ('INTERMEDIO', 'Intermedio'),
@@ -25,7 +24,6 @@ class Analisis(models.Model):
 
 
 class Vulnerabilidad(models.Model):
-
     SEVERIDAD_CHOICES = (
         ('BAJA', 'Baja'),
         ('MEDIA', 'Media'),

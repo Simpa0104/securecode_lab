@@ -1,0 +1,125 @@
+/* ─────────────────────────────────────────
+   login.css — Estilos del login SecureCode Lab
+   ───────────────────────────────────────── */
+
+/* FONDO */
+body {
+    background-color: #0f1923;
+}
+
+/* SECCIÓN CARRUSEL */
+.carousel-section {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    border-radius: 16px;
+    padding: 2.5rem;
+    color: white;
+    height: 100%;
+}
+
+.owasp-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 3px 14px;
+    font-size: 0.78rem;
+    color: #adb5bd;
+    margin-bottom: 1rem;
+}
+
+.carousel-item h3 {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 0.75rem;
+}
+
+.carousel-item p {
+    color: #ced4da;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.feature-pill {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.8rem;
+    color: #e9ecef;
+    margin: 3px;
+}
+
+/* BARRA DE INCIDENCIA */
+.severity-bar {
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    margin-top: 1.2rem;
+}
+
+.severity-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #e63946, #f4a261);
+}
+
+.severity-label {
+    font-size: 0.75rem;
+    color: #adb5bd;
+    margin-top: 4px;
+}
+
+/* INDICADORES CARRUSEL */
+.carousel-indicators [data-bs-target] {
+    background-color: rgba(255, 255, 255, 0.4);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: none;
+}
+
+.carousel-indicators .active {
+    background-color: white;
+}
+
+/* TARJETA LOGIN */
+.login-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    padding: 2.5rem;
+}
+
+.login-card h5 {
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+}
+
+.form-control:focus {
+    border-color: #0f3460;
+    box-shadow: 0 0 0 0.2rem rgba(15, 52, 96, 0.2);
+}
+
+.btn-login {
+    background: linear-gradient(135deg, #1a1a2e, #0f3460);
+    border: none;
+    color: white;
+    padding: 0.6rem;
+    font-weight: 600;
+}
+
+.btn-login:hover {
+    opacity: 0.9;
+    color: white;
+}
+
+/* FOOTER OVERRIDE para fondo oscuro */
+.footer {
+    background-color: #0a0f1a !important;
+    color: #495057 !important;
+}
+
+.footer strong {
+    color: #6c757d !important;
+}

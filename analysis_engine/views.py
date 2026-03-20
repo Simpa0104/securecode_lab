@@ -54,7 +54,6 @@ def ejecutar(request, proyecto_pk):
 
 @login_required
 def resultado(request, analisis_pk):
-
     if es_admin(request.user):
         analisis = get_object_or_404(Analisis, pk=analisis_pk)
     else:
@@ -93,7 +92,6 @@ def resultado(request, analisis_pk):
 
 @login_required
 def historial(request, proyecto_pk):
-
     if es_admin(request.user):
         proyecto = get_object_or_404(Project, pk=proyecto_pk)
     else:

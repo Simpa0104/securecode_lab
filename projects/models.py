@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 
 
 class Project(models.Model):
-
     STATUS_CHOICES = (
         ('pending', 'Pendiente'),
         ('analyzed', 'Analizado'),
