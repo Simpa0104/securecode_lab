@@ -1,4 +1,3 @@
-/* VARIABLES DE COLOR */
 :root {
     --bg-primary:     #0f1923;
     --bg-card:        #16213e;
@@ -14,7 +13,6 @@
     --footer-bg:      #0a0f1a;
 }
 
-/* GENERAL */
 body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
@@ -27,7 +25,6 @@ main {
     flex: 1;
 }
 
-/* TEXTOS */
 h1, h2, h3, h4, h5, h6 {
     color: var(--text-primary);
 }
@@ -48,7 +45,6 @@ a:hover {
     color: var(--text-muted) !important;
 }
 
-/* NAVBAR */
 .navbar {
     background-color: var(--navbar-bg) !important;
     border-bottom: 1px solid var(--border-color);
@@ -70,7 +66,6 @@ a:hover {
     font-weight: 600;
 }
 
-/* FOOTER */
 .footer {
     background-color: var(--footer-bg);
     color: var(--text-muted);
@@ -83,7 +78,6 @@ a:hover {
     color: var(--text-secondary);
 }
 
-/* TARJETAS */
 .card {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color) !important;
@@ -102,7 +96,6 @@ a:hover {
     border-top: 1px solid var(--border-color);
 }
 
-/* TABLAS */
 .table {
     color: var(--text-primary);
     --bs-table-bg: transparent;
@@ -124,7 +117,6 @@ a:hover {
     border-color: var(--border-color);
 }
 
-/* FORMULARIOS */
 .form-control,
 .form-select {
     background-color: var(--bg-input);
@@ -152,7 +144,6 @@ a:hover {
     color: var(--text-secondary);
 }
 
-/* ALERTS */
 .alert-light {
     background-color: var(--bg-card-alt);
     border-color: var(--border-color);
@@ -183,12 +174,10 @@ a:hover {
     color: #f07080;
 }
 
-/* FONDO CLARO (bg-light) */
 .bg-light {
     background-color: var(--bg-card-alt) !important;
 }
 
-/* BOTONES */
 .btn-outline-primary {
     color: #7eb3f5;
     border-color: #7eb3f5;
@@ -229,7 +218,6 @@ a:hover {
     color: var(--text-primary);
 }
 
-/* LIST GROUP */
 .list-group-item {
     background-color: var(--bg-card);
     border-color: var(--border-color);
@@ -240,7 +228,6 @@ a:hover {
     background-color: var(--bg-card-alt);
 }
 
-/* HR */
 hr {
     border-color: var(--border-color);
 }

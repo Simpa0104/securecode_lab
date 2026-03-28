@@ -9,11 +9,6 @@ from analysis_engine.models import Analisis
 
 
 def es_admin(user):
-    """
-    Retorna True si el usuario es admin.
-    Un usuario es admin si es superusuario de Django
-    o tiene un Profile con role='admin'.
-    """
     if user.is_superuser:
         return True
     try:
@@ -24,7 +19,6 @@ def es_admin(user):
 
 @login_required
 def home(request):
-    """Redirige al dashboard según el rol del usuario."""
     if es_admin(request.user):
         return redirect('dashboard_admin')
     return redirect('dashboard_estudiante')
@@ -32,7 +26,6 @@ def home(request):
 
 @login_required
 def dashboard_estudiante(request):
-    """Dashboard principal del estudiante."""
     if es_admin(request.user):
         return redirect('dashboard_admin')
 
@@ -58,7 +51,6 @@ def dashboard_estudiante(request):
 
 @login_required
 def dashboard_admin(request):
-    """Dashboard del administrador."""
     if not es_admin(request.user):
         return redirect('dashboard_estudiante')
 
@@ -81,20 +73,15 @@ def dashboard_admin(request):
 
 @login_required
 def gestion_usuarios(request):
-    """Lista todos los usuarios del sistema (RF-11)."""
     if not es_admin(request.user):
         return redirect('dashboard_estudiante')
 
     usuarios = User.objects.select_related('profile').order_by('-date_joined')
-
-    return render(request, 'users/gestion_usuarios.html', {
-        'usuarios': usuarios,
-    })
+    return render(request, 'users/gestion_usuarios.html', {'usuarios': usuarios})
 
 
 @login_required
 def editar_usuario(request, user_pk):
-    """Permite al admin editar rol y estado de un usuario (RF-11)."""
     if not es_admin(request.user):
         return redirect('dashboard_estudiante')
 
@@ -107,24 +94,68 @@ def editar_usuario(request, user_pk):
     )
 
     if request.method == 'POST':
+        nuevo_username = request.POST.get('username', '').strip()
+        nuevo_email = request.POST.get('email', '').strip()
         nuevo_rol = request.POST.get('role')
         activo = request.POST.get('is_active') == 'on'
+
+        if not nuevo_username:
+            messages.error(request, 'El nombre de usuario no puede estar vacio.')
+            return render(request, 'users/editar_usuario.html', {
+                'usuario': usuario,
+                'profile': profile,
+                'es_mismo_usuario': es_mismo_usuario,
+            })
+
+        if User.objects.filter(username=nuevo_username).exclude(pk=usuario.pk).exists():
+            messages.error(request, f'El nombre de usuario "{nuevo_username}" ya esta en uso.')
+            return render(request, 'users/editar_usuario.html', {
+                'usuario': usuario,
+                'profile': profile,
+                'es_mismo_usuario': es_mismo_usuario,
+            })
+
+        usuario.username = nuevo_username
+        usuario.email = nuevo_email
+
+        if not es_mismo_usuario:
+            usuario.is_active = activo
+
+        usuario.save()
 
         if nuevo_rol in ['student', 'admin']:
             profile.role = nuevo_rol
             profile.save()
 
-        if not es_mismo_usuario:
-            usuario.is_active = activo
-            usuario.save()
-
-        messages.success(request, f'Usuario "{usuario.username}" actualizado correctamente.')
+        messages.success(request, f'Usuario "{nuevo_username}" actualizado correctamente.')
         return redirect('gestion_usuarios')
 
     return render(request, 'users/editar_usuario.html', {
         'usuario': usuario,
         'profile': profile,
         'es_mismo_usuario': es_mismo_usuario,
+    })
+
+
+@login_required
+def eliminar_usuario(request, user_pk):
+    if not es_admin(request.user):
+        return redirect('dashboard_estudiante')
+
+    usuario = get_object_or_404(User, pk=user_pk)
+
+    if usuario.pk == request.user.pk:
+        messages.error(request, 'No puedes eliminar tu propia cuenta.')
+        return redirect('gestion_usuarios')
+
+    if request.method == 'POST':
+        username = usuario.username
+        usuario.delete()
+        messages.success(request, f'Usuario "{username}" eliminado correctamente.')
+        return redirect('gestion_usuarios')
+
+    return render(request, 'users/confirmar_eliminar_usuario.html', {
+        'usuario': usuario,
     })
 
 

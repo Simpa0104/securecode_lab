@@ -9,20 +9,36 @@
     <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
 
-            <div class="mb-4 p-3 bg-light rounded">
-                <p class="mb-1"><strong>Usuario:</strong> {{ usuario.username }}</p>
-                <p class="mb-1"><strong>Correo:</strong> {{ usuario.email|default:"Sin correo" }}</p>
-                <p class="mb-0"><strong>Registro:</strong> {{ usuario.date_joined|date:"d/m/Y H:i" }}</p>
-            </div>
-
             <form method="post">
                 {% csrf_token %}
+
+                <h6 class="text-muted mb-3">Datos de la cuenta</h6>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Nombre de usuario</label>
+                    <input type="text" name="username" class="form-control"
+                           value="{{ usuario.username }}" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Correo electronico</label>
+                    <input type="email" name="email" class="form-control"
+                           value="{{ usuario.email }}" placeholder="Sin correo">
+                </div>
+
+                <hr>
+
+                <h6 class="text-muted mb-3 mt-3">Permisos</h6>
 
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Rol</label>
                     <select name="role" class="form-select">
-                        <option value="student" {% if profile.role == 'student' %}selected{% endif %}>Estudiante</option>
-                        <option value="admin" {% if profile.role == 'admin' %}selected{% endif %}>Administrador</option>
+                        <option value="student" {% if profile.role == 'student' %}selected{% endif %}>
+                            Estudiante
+                        </option>
+                        <option value="admin" {% if profile.role == 'admin' %}selected{% endif %}>
+                            Administrador
+                        </option>
                     </select>
                     <div class="form-text">
                         El rol Admin permite acceder al dashboard administrativo y ver todos los proyectos.

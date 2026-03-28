@@ -1,8 +1,3 @@
-/* ─────────────────────────────────────────
-   resultado.css — Estilos del reporte de análisis
-   ───────────────────────────────────────── */
-
-/* CÍRCULO DEL SCORE */
 .score-circle {
     width: 140px;
     height: 140px;
@@ -17,7 +12,6 @@
     margin: 0 auto;
 }
 
-/* TARJETAS DE VULNERABILIDADES */
 .vuln-card {
     border-left: 4px solid;
     margin-bottom: 1rem;
@@ -39,7 +33,6 @@
     border-color: #6c757d;
 }
 
-/* BADGES DE SEVERIDAD */
 .badge-CRITICA {
     background-color: #212529;
     color: white;
@@ -60,7 +53,6 @@
     color: white;
 }
 
-/* FRAGMENTO DE CÓDIGO */
 .code-snippet {
     background: #f8f9fa;
     padding: 8px 12px;

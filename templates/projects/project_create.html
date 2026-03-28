@@ -3,28 +3,33 @@
 
 {% block content %}
 <div style="max-width: 600px; margin: 0 auto;">
-    <a href="{% url 'project_list' %}" class="text-muted small">← Volver a mis proyectos</a>
-    <h2 class="mt-2 mb-4">Nuevo Proyecto</h2>
+    <a href="{% url 'project_list' %}" class="text-muted small">Volver a mis proyectos</a>
+    <h2 class="mt-2 mb-1">Nuevo Proyecto</h2>
+    <p class="text-muted mb-4">
+        El archivo sera analizado inmediatamente. No se almacena en el servidor.
+    </p>
 
     <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
+
                 {% for field in form %}
                 <div class="mb-3">
                     <label class="form-label fw-semibold">{{ field.label }}</label>
                     {{ field }}
                     {% if field.help_text %}
-                    <div class="form-text">{{ field.help_text }}</div>
+                        <div class="form-text">{{ field.help_text }}</div>
                     {% endif %}
                     {% for error in field.errors %}
-                    <div class="text-danger small mt-1">{{ error }}</div>
+                        <div class="text-danger small mt-1">{{ error }}</div>
                     {% endfor %}
                 </div>
                 {% endfor %}
+
                 <div class="d-flex justify-content-between mt-4">
                     <a href="{% url 'project_list' %}" class="btn btn-secondary">Cancelar</a>
-                    <button type="submit" class="btn btn-primary">Subir proyecto</button>
+                    <button type="submit" class="btn btn-primary">Analizar proyecto</button>
                 </div>
             </form>
         </div>

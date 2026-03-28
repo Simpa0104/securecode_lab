@@ -1,9 +1,3 @@
-"""
-analysis_engine/rules/avanzado.py
-Reglas de nivel avanzado — OWASP A01, A02, A06, A10
-Configuracion, criptografia debil, dependencias y arquitectura.
-"""
-
 REGLAS_AVANZADO = [
     {
         'id': 'HASH-01',

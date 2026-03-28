@@ -1,9 +1,3 @@
-"""
-analysis_engine/rules/intermedio.py
-Reglas de nivel intermedio — OWASP A03, A04, A08
-Patrones mas especificos que requieren mayor conocimiento para identificar.
-"""
-
 REGLAS_INTERMEDIO = [
     {
         'id': 'INJECT-01',

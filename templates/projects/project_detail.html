@@ -6,51 +6,54 @@
     <a href="{% url 'project_list' %}" class="text-muted small">Volver a mis proyectos</a>
     <h2 class="mt-2 mb-4">{{ project.name }}</h2>
 
-    <div class="card border-0 shadow-sm mb-3">
+    <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
             <p><strong>Descripcion:</strong> {{ project.description|default:"Sin descripcion" }}</p>
-            <p><strong>Archivo:</strong> {{ project.file.name }} ({{ project.get_file_size_kb }} KB)</p>
-            <p><strong>Fecha de subida:</strong> {{ project.created_at|date:"d/m/Y H:i" }}</p>
-            <p class="mb-0">
-                <strong>Estado:</strong>
-                {% if project.status == 'pending' %}
-                    <span class="badge bg-warning text-dark">Pendiente de analisis</span>
-                {% elif project.status == 'analyzed' %}
-                    <span class="badge bg-success">Analizado</span>
-                {% else %}
-                    <span class="badge bg-danger">Error en analisis</span>
-                {% endif %}
-            </p>
+            <p><strong>Archivo analizado:</strong> {{ project.filename }}</p>
+            <p class="mb-0"><strong>Fecha:</strong> {{ project.created_at|date:"d/m/Y H:i" }}</p>
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm mb-3" style="border-left: 4px solid #4a7fc1 !important;">
-        <div class="card-body">
-            <h5 class="card-title">Analisis de seguridad</h5>
-            <p class="card-text">
-                Selecciona el nivel de analisis y ejecuta el motor para detectar
-                vulnerabilidades en tu proyecto.
-            </p>
-            <form method="post" action="{% url 'analisis_ejecutar' project.pk %}">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Nivel de analisis</label>
-                    <select name="nivel" class="form-select">
-                        <option value="BASICO">Basico — SQL Injection, XSS, configuraciones inseguras</option>
-                        <option value="INTERMEDIO">Intermedio — Basico + eval/exec, deserializacion, credenciales en comentarios</option>
-                        <option value="AVANZADO">Avanzado — Todo lo anterior + hash debiles, CORS, open redirect, dependencias</option>
-                    </select>
-                    <div class="form-text">
-                        El nivel Avanzado incluye todas las reglas de los niveles anteriores.
-                    </div>
-                </div>
-                <div class="d-flex align-items-center gap-3">
-                    <button type="submit" class="btn btn-primary">Analizar proyecto</button>
-                    {% if project.status == 'analyzed' %}
-                        <a href="{% url 'analisis_historial' project.pk %}" class="btn btn-outline-secondary">Ver historial</a>
-                    {% endif %}
-                </div>
-            </form>
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header">
+            <strong>Historial de analisis</strong>
+        </div>
+        <div class="card-body p-0">
+            {% if analisis_list %}
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Fecha</th>
+                        <th>Nivel</th>
+                        <th>Score</th>
+                        <th>Vulnerabilidades</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for analisis in analisis_list %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ analisis.fecha|date:"d/m/Y H:i" }}</td>
+                        <td><span class="badge bg-secondary">{{ analisis.nivel }}</span></td>
+                        <td>
+                            <strong class="{% if analisis.score >= 80 %}text-success{% elif analisis.score >= 60 %}text-warning{% else %}text-danger{% endif %}">
+                                {{ analisis.score }}/100
+                            </strong>
+                        </td>
+                        <td>{{ analisis.vulnerabilidades.count }}</td>
+                        <td>
+                            <a href="{% url 'analisis_resultado' analisis.pk %}"
+                               class="btn btn-sm btn-outline-primary">Ver reporte</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+                <div class="text-center py-4 text-muted">Sin analisis registrados.</div>
+            {% endif %}
         </div>
     </div>
 

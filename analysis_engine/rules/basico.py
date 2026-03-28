@@ -1,9 +1,3 @@
-"""
-analysis_engine/rules/basico.py
-Reglas de nivel basico — OWASP A03, A05, A07
-Patrones simples y mas comunes en proyectos academicos.
-"""
-
 REGLAS_BASICO = [
     {
         'id': 'SQL-01',
