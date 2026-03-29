@@ -9,6 +9,35 @@
     </div>
 </div>
 
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body py-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-6">
+                <label class="form-label small fw-semibold mb-1">Buscar usuario</label>
+                <input type="text" name="q" class="form-control form-control-sm"
+                       placeholder="Nombre, usuario o correo..."
+                       value="{{ busqueda }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-semibold mb-1">Filtrar por clase</label>
+                <select name="clase" class="form-select form-select-sm">
+                    <option value="">Todas las clases</option>
+                    {% for valor, etiqueta in clases %}
+                        {% if valor %}
+                        <option value="{{ valor }}" {% if filtro_clase == valor %}selected{% endif %}>
+                            {{ etiqueta }}
+                        </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-dark btn-sm w-100">Buscar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="card border-0 shadow-sm">
     <div class="card-body p-0">
         <table class="table table-hover mb-0">
@@ -16,8 +45,11 @@
                 <tr>
                     <th>ID</th>
                     <th>Usuario</th>
+                    <th>Primer Nombre</th>
+                    <th>Apellidos</th>
                     <th>Correo</th>
                     <th>Rol</th>
+                    <th>Clase</th>
                     <th>Estado</th>
                     <th>Registro</th>
                     <th>Proyectos</th>
@@ -34,14 +66,25 @@
                             <span class="badge bg-secondary ms-1">Tu cuenta</span>
                         {% endif %}
                     </td>
+                    <td class="small">{{ u.first_name|default:"—" }}</td>
+                    <td class="small">{{ u.last_name|default:"—" }}</td>
                     <td class="small">{{ u.email|default:"—" }}</td>
                     <td>
                         {% if u.is_superuser %}
                             <span class="badge bg-danger">Superusuario</span>
                         {% elif u.profile.role == 'admin' %}
                             <span class="badge bg-danger">Admin</span>
+                        {% elif u.profile.role == 'visitor' %}
+                            <span class="badge bg-info text-dark">Visitante</span>
                         {% else %}
                             <span class="badge bg-secondary">Estudiante</span>
+                        {% endif %}
+                    </td>
+                    <td class="small">
+                        {% if u.profile.role == 'student' %}
+                            {{ u.profile.numero_clase|default:"—" }}
+                        {% else %}
+                            <span class="text-muted">—</span>
                         {% endif %}
                     </td>
                     <td>
@@ -63,6 +106,13 @@
                     </td>
                 </tr>
                 {% endfor %}
+                {% if not usuarios %}
+                <tr>
+                    <td colspan="11" class="text-center py-3 text-muted">
+                        No se encontraron usuarios con los filtros aplicados.
+                    </td>
+                </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>

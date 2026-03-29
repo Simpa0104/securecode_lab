@@ -8,7 +8,6 @@
 
     <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
-
             <form method="post">
                 {% csrf_token %}
 
@@ -27,22 +26,38 @@
                 </div>
 
                 <hr>
-
                 <h6 class="text-muted mb-3 mt-3">Permisos</h6>
 
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Rol</label>
-                    <select name="role" class="form-select">
+                    <select name="role" class="form-select" id="id_role_edit">
                         <option value="student" {% if profile.role == 'student' %}selected{% endif %}>
                             Estudiante
                         </option>
+                        <option value="monitor" {% if profile.role == 'monitor' %}selected{% endif %}>
+                            Monitor
+                        </option>
                         <option value="admin" {% if profile.role == 'admin' %}selected{% endif %}>
-                            Administrador
+                            Profesor / Administrador
                         </option>
                     </select>
                     <div class="form-text">
-                        El rol Admin permite acceder al dashboard administrativo y ver todos los proyectos.
+                        El rol Profesor permite gestionar usuarios y ver todos los proyectos.
+                        El Monitor puede ver proyectos y analisis pero no gestiona usuarios.
                     </div>
+                </div>
+
+                <div class="mb-4" id="div_clase_edit">
+                    <label class="form-label fw-semibold">Clase asignada</label>
+                    <select name="numero_clase" class="form-select">
+                        {% for valor, etiqueta in clases %}
+                        <option value="{{ valor }}"
+                            {% if profile.numero_clase == valor %}selected{% endif %}>
+                            {{ etiqueta }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">Solo aplica para estudiantes.</div>
                 </div>
 
                 <div class="mb-4">
@@ -67,8 +82,23 @@
                     <button type="submit" class="btn btn-primary">Guardar cambios</button>
                 </div>
             </form>
-
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const roleSelect = document.getElementById('id_role_edit');
+    const divClase = document.getElementById('div_clase_edit');
+
+    function toggleClaseEdit() {
+        divClase.style.display = roleSelect.value === 'student' ? 'block' : 'none';
+    }
+
+    if (roleSelect) {
+        roleSelect.addEventListener('change', toggleClaseEdit);
+        toggleClaseEdit();
+    }
+</script>
 {% endblock %}

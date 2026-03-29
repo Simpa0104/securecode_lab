@@ -1,3 +1,4 @@
+<!--templates/users/editar_usuario.html-->
 {% extends 'base.html' %}
 {% block title %}Panel Admin - SecureCode Lab{% endblock %}
 
@@ -36,12 +37,23 @@
                 <strong>Usuarios recientes</strong>
                 <a href="{% url 'gestion_usuarios' %}" class="btn btn-sm btn-outline-primary">Ver todos</a>
             </div>
+            <div class="card-body border-bottom py-2 px-3">
+                <form method="get" class="d-flex gap-2">
+                    {% if busqueda_analisis %}
+                        <input type="hidden" name="q_analisis" value="{{ busqueda_analisis }}">
+                    {% endif %}
+                    <input type="text" name="q_usuarios" class="form-control form-control-sm"
+                           placeholder="Buscar usuario..." value="{{ busqueda_usuarios }}">
+                    <button type="submit" class="btn btn-dark btn-sm">Buscar</button>
+                </form>
+            </div>
             <div class="card-body p-0">
                 {% if usuarios_recientes %}
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                     <tr>
                         <th>Usuario</th>
+                        <th>Nombre</th>
                         <th>Rol</th>
                         <th>Registro</th>
                     </tr>
@@ -50,11 +62,14 @@
                     {% for u in usuarios_recientes %}
                     <tr>
                         <td>{{ u.username }}</td>
+                        <td class="small">{{ u.first_name }} {{ u.last_name }}</td>
                         <td>
                             {% if u.is_superuser %}
                             <span class="badge bg-danger">Superusuario</span>
                             {% elif u.profile.role == 'admin' %}
                             <span class="badge bg-danger">Admin</span>
+                            {% elif u.profile.role == 'visitor' %}
+                            <span class="badge bg-info text-dark">Visitante</span>
                             {% else %}
                             <span class="badge bg-secondary">Estudiante</span>
                             {% endif %}
@@ -65,7 +80,7 @@
                     </tbody>
                 </table>
                 {% else %}
-                <div class="text-center py-3 text-muted">Sin usuarios.</div>
+                <div class="text-center py-3 text-muted">Sin resultados.</div>
                 {% endif %}
             </div>
         </div>
@@ -75,6 +90,16 @@
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white">
                 <strong>Ultimos analisis del sistema</strong>
+            </div>
+            <div class="card-body border-bottom py-2 px-3">
+                <form method="get" class="d-flex gap-2">
+                    {% if busqueda_usuarios %}
+                        <input type="hidden" name="q_usuarios" value="{{ busqueda_usuarios }}">
+                    {% endif %}
+                    <input type="text" name="q_analisis" class="form-control form-control-sm"
+                           placeholder="Buscar proyecto o usuario..." value="{{ busqueda_analisis }}">
+                    <button type="submit" class="btn btn-dark btn-sm">Buscar</button>
+                </form>
             </div>
             <div class="card-body p-0">
                 {% if ultimos_analisis %}
@@ -92,11 +117,16 @@
                     {% for analisis in ultimos_analisis %}
                     <tr>
                         <td>{{ analisis.project.name }}</td>
-                        <td><small>{{ analisis.project.user.username }}</small></td>
                         <td>
-                                <span class="badge {% if analisis.score >= 80 %}bg-success{% elif analisis.score >= 60 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
-                                    {{ analisis.score }}/100
-                                </span>
+                            <small>{{ analisis.project.user.username }}</small><br>
+                            <small class="text-muted">
+                                {{ analisis.project.user.first_name }} {{ analisis.project.user.last_name }}
+                            </small>
+                        </td>
+                        <td>
+                            <span class="badge {% if analisis.score >= 80 %}bg-success{% elif analisis.score >= 60 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                {{ analisis.score }}/100
+                            </span>
                         </td>
                         <td><small>{{ analisis.fecha|date:"d/m/Y H:i" }}</small></td>
                         <td>
@@ -109,7 +139,7 @@
                     </tbody>
                 </table>
                 {% else %}
-                <div class="text-center py-3 text-muted">Sin analisis aun.</div>
+                <div class="text-center py-3 text-muted">Sin resultados.</div>
                 {% endif %}
             </div>
         </div>

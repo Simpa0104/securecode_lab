@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Panel Monitor - SecureCode Lab{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0">Panel de Monitor</h3>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6 mb-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <div style="font-size:2rem; font-weight:bold;" class="text-success">{{ total_proyectos }}</div>
+            <div class="text-muted">Proyectos en el sistema</div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <div style="font-size:2rem; font-weight:bold;" class="text-warning">{{ total_analisis }}</div>
+            <div class="text-muted">Analisis ejecutados</div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white">
+        <strong>Analisis de estudiantes</strong>
+    </div>
+    <div class="card-body border-bottom py-2 px-3">
+        <form method="get" class="d-flex gap-2">
+            <input type="text" name="q_analisis" class="form-control form-control-sm"
+                   placeholder="Buscar por proyecto o usuario..."
+                   value="{{ busqueda_analisis }}">
+            <button type="submit" class="btn btn-dark btn-sm">Buscar</button>
+        </form>
+    </div>
+    <div class="card-body p-0">
+        {% if ultimos_analisis %}
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+            <tr>
+                <th>Proyecto</th>
+                <th>Estudiante</th>
+                <th>Score</th>
+                <th>Fecha</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for analisis in ultimos_analisis %}
+            <tr>
+                <td>{{ analisis.project.name }}</td>
+                <td>
+                    <small>{{ analisis.project.user.username }}</small><br>
+                    <small class="text-muted">
+                        {{ analisis.project.user.first_name }} {{ analisis.project.user.last_name }}
+                    </small>
+                </td>
+                <td>
+                    <span class="badge {% if analisis.score >= 80 %}bg-success{% elif analisis.score >= 60 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                        {{ analisis.score }}/100
+                    </span>
+                </td>
+                <td><small>{{ analisis.fecha|date:"d/m/Y H:i" }}</small></td>
+                <td>
+                    <a href="{% url 'analisis_resultado' analisis.pk %}"
+                       class="btn btn-outline-primary"
+                       style="font-size:0.75rem; padding:2px 8px;">Ver</a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="text-center py-3 text-muted">Sin resultados.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

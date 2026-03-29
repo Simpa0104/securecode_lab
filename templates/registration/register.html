@@ -4,35 +4,70 @@
 {% block navbar %}{% endblock %}
 
 {% block content %}
-<div style="max-width: 450px; margin: 2rem auto;">
+<div style="max-width: 480px; margin: 2rem auto;">
     <div class="text-center mb-4">
         <h4 class="mt-2">Crear cuenta en SecureCode Lab</h4>
-        <p class="text-muted small">Plataforma educativa de análisis de seguridad</p>
+        <p class="text-muted small">Plataforma educativa de analisis de seguridad</p>
     </div>
 
     <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
             <form method="post">
                 {% csrf_token %}
+
                 {% for field in form %}
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.help_text %}
-                    <div class="form-text">{{ field.help_text }}</div>
-                    {% endif %}
-                    {% for error in field.errors %}
-                    <div class="text-danger small mt-1">{{ error }}</div>
-                    {% endfor %}
-                </div>
+                {% if field.html_name == 'numero_clase' %}
+                {# Este campo se maneja aparte abajo #}
+                {% else %}
+                <div class="mb-3" {% if field.html_name==
+                'grupo' %}id="div_grupo"{% endif %}>
+                <label class="form-label fw-semibold">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                <div class="form-text">{{ field.help_text }}</div>
+                {% endif %}
+                {% for error in field.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
                 {% endfor %}
-                <button type="submit" class="btn btn-dark w-100 mt-2">Registrarse</button>
-            </form>
-            <hr>
-            <p class="text-center text-muted small mb-0">
-                ¿Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesión</a>
-            </p>
         </div>
+        {% endif %}
+        {% endfor %}
+
+        <div class="mb-3" id="div_numero_clase" style="display:none;">
+            <label class="form-label fw-semibold">{{ form.numero_clase.label }}</label>
+            {{ form.numero_clase }}
+            {% for error in form.numero_clase.errors %}
+            <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn btn-dark w-100 mt-2">Registrarse</button>
+        </form>
+        <hr>
+        <p class="text-center text-muted small mb-0">
+            ¿Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesion</a>
+        </p>
     </div>
 </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const grupoSelect = document.getElementById('id_grupo');
+    const divClase = document.getElementById('div_numero_clase');
+
+    function toggleClase() {
+        if (grupoSelect && grupoSelect.value === 'student') {
+            divClase.style.display = 'block';
+        } else {
+            divClase.style.display = 'none';
+        }
+    }
+
+    if (grupoSelect) {
+        grupoSelect.addEventListener('change', toggleClase);
+        toggleClase(); // ejecutar al cargar por si hay valor preseleccionado
+    }
+</script>
 {% endblock %}
