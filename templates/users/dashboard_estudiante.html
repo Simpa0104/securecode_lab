@@ -1,9 +1,10 @@
+<!-- dasboard_estudiante.html -->
 {% extends 'base.html' %}
 {% block title %}Dashboard - SecureCode Lab{% endblock %}
 
 {% block content %}
 <div class="mb-4">
-    <h3>Hola, {{ user.username }}</h3>
+    <h3>Hola, {{ user.first_name }} {{ user.last_name }}</h3>
     <p class="text-muted">Este es tu panel de control. Sube proyectos y analiza su seguridad.</p>
 </div>
 

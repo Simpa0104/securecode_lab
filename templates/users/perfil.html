@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}Mi Perfil - SecureCode Lab{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 0 auto;">
+    <a href="{% url 'home' %}" class="text-muted small">Volver al inicio</a>
+    <h2 class="mt-2 mb-4">Mi Perfil</h2>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h6 class="text-muted mb-3">Informacion de la cuenta</h6>
+
+            <div class="mb-2">
+                <span class="fw-semibold">Usuario:</span>
+                <span class="ms-2">{{ user.username }}</span>
+            </div>
+            <div class="mb-2">
+                <span class="fw-semibold">Rol:</span>
+                <span class="ms-2">
+                    {% if user.profile.role == 'monitor' %}Monitor
+                    {% else %}Estudiante{% endif %}
+                </span>
+            </div>
+            {% if user.profile.numero_clase %}
+            <div class="mb-2">
+                <span class="fw-semibold">Clase:</span>
+                <span class="ms-2">{{ user.profile.numero_clase }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h6 class="text-muted mb-3">Editar datos personales</h6>
+
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="datos">
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Primer nombre</label>
+                    <input type="text" name="first_name" class="form-control"
+                           value="{{ user.first_name }}">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Apellidos</label>
+                    <input type="text" name="last_name" class="form-control"
+                           value="{{ user.last_name }}">
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Correo electronico</label>
+                    <input type="email" name="email" class="form-control"
+                           value="{{ user.email }}" placeholder="Sin correo registrado">
+                </div>
+
+                <button type="submit" class="btn btn-dark w-100">Guardar datos</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <h6 class="text-muted mb-3">Cambiar contrasena</h6>
+
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="contrasena">
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Contrasena actual</label>
+                    <input type="password" name="contrasena_actual" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Nueva contrasena</label>
+                    <input type="password" name="contrasena_nueva" class="form-control" required>
+                    <div class="form-text">Minimo 8 caracteres.</div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Confirmar nueva contrasena</label>
+                    <input type="password" name="contrasena_confirmar" class="form-control" required>
+                </div>
+
+                <button type="submit" class="btn btn-dark w-100">Actualizar contrasena</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

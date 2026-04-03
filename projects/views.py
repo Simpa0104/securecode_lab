@@ -1,20 +1,39 @@
+# projects/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db.models import Q
+from django.core.paginator import Paginator
 from .models import Project
 from .forms import ProjectForm
 from analysis_engine.models import Analisis, Vulnerabilidad
 from analysis_engine.analyzer import ejecutar_analisis
-from users.views import es_admin
+from users.views import es_admin, es_monitor
 
 
 @login_required
 def project_list(request):
+    busqueda = request.GET.get('q', '').strip()
+
     if es_admin(request.user):
         projects = Project.objects.all().select_related('user')
     else:
         projects = Project.objects.filter(user=request.user)
-    return render(request, 'projects/project_list.html', {'projects': projects})
+
+    if busqueda:
+        projects = projects.filter(
+            Q(name__icontains=busqueda) |
+            Q(description__icontains=busqueda)
+        )
+
+    paginator = Paginator(projects.order_by('-created_at'), 10)
+    pagina_num = request.GET.get('pagina', 1)
+    pagina = paginator.get_page(pagina_num)
+
+    return render(request, 'projects/project_list.html', {
+        'projects': pagina,
+        'busqueda': busqueda,
+    })
 
 
 @login_required

@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db.models import Q
+from django.core.paginator import Paginator
+from django.contrib.auth import update_session_auth_hash
 from .forms import RegisterForm
 from .models import Profile
 from projects.models import Project
@@ -71,12 +73,32 @@ def dashboard_monitor(request):
 
     busqueda_analisis = request.GET.get('q_analisis', '').strip()
 
-    total_proyectos = Project.objects.count()
-    total_analisis = Analisis.objects.count()
+    try:
+        clase_monitor = request.user.profile.numero_clase
+    except Profile.DoesNotExist:
+        clase_monitor = ''
 
-    analisis_qs = Analisis.objects.select_related(
-        'project', 'project__user'
-    ).order_by('-fecha')
+    if clase_monitor:
+        estudiantes_ids = User.objects.filter(
+            profile__role='student',
+            profile__numero_clase=clase_monitor
+        ).values_list('id', flat=True)
+
+        analisis_qs = Analisis.objects.filter(
+            project__user__id__in=estudiantes_ids
+        ).select_related('project', 'project__user')
+
+        total_proyectos = Project.objects.filter(
+            user__id__in=estudiantes_ids
+        ).count()
+    else:
+        analisis_qs = Analisis.objects.select_related(
+            'project', 'project__user'
+        ).filter(project__user__profile__role='student')
+
+        total_proyectos = Project.objects.count()
+
+    total_analisis = analisis_qs.count()
 
     if busqueda_analisis:
         analisis_qs = analisis_qs.filter(
@@ -86,13 +108,14 @@ def dashboard_monitor(request):
             Q(project__user__last_name__icontains=busqueda_analisis)
         )
 
-    ultimos_analisis = analisis_qs[:15]
+    ultimos_analisis = analisis_qs.order_by('-fecha')[:15]
 
     return render(request, 'users/dashboard_monitor.html', {
         'total_proyectos': total_proyectos,
         'total_analisis': total_analisis,
         'ultimos_analisis': ultimos_analisis,
         'busqueda_analisis': busqueda_analisis,
+        'clase_monitor': clase_monitor,
     })
 
 
@@ -105,6 +128,9 @@ def dashboard_admin(request):
 
     busqueda_usuarios = request.GET.get('q_usuarios', '').strip()
     busqueda_analisis = request.GET.get('q_analisis', '').strip()
+    filtro_clase_usuarios = request.GET.get('clase_usuarios', '').strip()
+    filtro_clase_analisis = request.GET.get('clase_analisis', '').strip()
+    pagina_usuarios_num = request.GET.get('pagina_usuarios', 1)
 
     total_usuarios = User.objects.count()
     total_proyectos = Project.objects.count()
@@ -118,7 +144,11 @@ def dashboard_admin(request):
             Q(last_name__icontains=busqueda_usuarios) |
             Q(email__icontains=busqueda_usuarios)
         )
-    usuarios_recientes = usuarios_qs[:10]
+    if filtro_clase_usuarios:
+        usuarios_qs = usuarios_qs.filter(profile__numero_clase=filtro_clase_usuarios)
+
+    paginator_usuarios = Paginator(usuarios_qs, 8)
+    usuarios_recientes = paginator_usuarios.get_page(pagina_usuarios_num)
 
     analisis_qs = Analisis.objects.select_related(
         'project', 'project__user'
@@ -130,6 +160,10 @@ def dashboard_admin(request):
             Q(project__user__first_name__icontains=busqueda_analisis) |
             Q(project__user__last_name__icontains=busqueda_analisis)
         )
+    if filtro_clase_analisis:
+        analisis_qs = analisis_qs.filter(
+            project__user__profile__numero_clase=filtro_clase_analisis
+        )
     ultimos_analisis = analisis_qs[:10]
 
     return render(request, 'users/dashboard_admin.html', {
@@ -140,6 +174,9 @@ def dashboard_admin(request):
         'usuarios_recientes': usuarios_recientes,
         'busqueda_usuarios': busqueda_usuarios,
         'busqueda_analisis': busqueda_analisis,
+        'filtro_clase_usuarios': filtro_clase_usuarios,
+        'filtro_clase_analisis': filtro_clase_analisis,
+        'clases': Profile.CLASE_CHOICES,
     })
 
 
@@ -166,8 +203,12 @@ def gestion_usuarios(request):
     if filtro_clase:
         usuarios = usuarios.filter(profile__numero_clase=filtro_clase)
 
+    paginator = Paginator(usuarios, 15)
+    pagina_num = request.GET.get('pagina', 1)
+    pagina = paginator.get_page(pagina_num)
+
     return render(request, 'users/gestion_usuarios.html', {
-        'usuarios': usuarios,
+        'usuarios': pagina,
         'busqueda': busqueda,
         'filtro_clase': filtro_clase,
         'clases': Profile.CLASE_CHOICES,
@@ -223,7 +264,7 @@ def editar_usuario(request, user_pk):
         if nuevo_rol in ['student', 'monitor', 'admin']:
             profile.role = nuevo_rol
 
-        profile.numero_clase = nuevo_numero_clase if nuevo_rol == 'student' else ''
+        profile.numero_clase = nuevo_numero_clase if nuevo_rol in ['student', 'monitor'] else ''
         profile.save()
 
         messages.success(request, f'Usuario "{nuevo_username}" actualizado correctamente.')
@@ -259,6 +300,51 @@ def eliminar_usuario(request, user_pk):
     return render(request, 'users/confirmar_eliminar_usuario.html', {'usuario': usuario})
 
 
+@login_required
+def perfil(request):
+    if request.method == 'POST':
+        accion = request.POST.get('accion')
+
+        if accion == 'datos':
+            nuevo_nombre = request.POST.get('first_name', '').strip()
+            nuevo_apellido = request.POST.get('last_name', '').strip()
+            nuevo_email = request.POST.get('email', '').strip()
+
+            request.user.first_name = nuevo_nombre
+            request.user.last_name = nuevo_apellido
+            request.user.email = nuevo_email
+            request.user.save()
+
+            messages.success(request, 'Datos actualizados correctamente.')
+            return redirect('perfil')
+
+        elif accion == 'contrasena':
+            contrasena_actual = request.POST.get('contrasena_actual', '')
+            contrasena_nueva = request.POST.get('contrasena_nueva', '')
+            contrasena_confirmar = request.POST.get('contrasena_confirmar', '')
+
+            if not request.user.check_password(contrasena_actual):
+                messages.error(request, 'La contrasena actual es incorrecta.')
+                return redirect('perfil')
+
+            if len(contrasena_nueva) < 8:
+                messages.error(request, 'La nueva contrasena debe tener al menos 8 caracteres.')
+                return redirect('perfil')
+
+            if contrasena_nueva != contrasena_confirmar:
+                messages.error(request, 'Las contrasenas nuevas no coinciden.')
+                return redirect('perfil')
+
+            request.user.set_password(contrasena_nueva)
+            request.user.save()
+            update_session_auth_hash(request, request.user)
+
+            messages.success(request, 'Contrasena actualizada correctamente.')
+            return redirect('perfil')
+
+    return render(request, 'users/perfil.html')
+
+
 def register(request):
     hay_admin = User.objects.filter(
         profile__role='admin'
@@ -276,7 +362,7 @@ def register(request):
                 grupo = 'student'
 
             numero_clase = ''
-            if grupo == 'student':
+            if grupo in ['student', 'monitor']:
                 numero_clase = form.cleaned_data.get('numero_clase', '')
 
             Profile.objects.create(

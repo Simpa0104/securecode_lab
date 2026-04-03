@@ -1,12 +1,9 @@
-<!--templates/users/editar_usuario.html-->
 {% extends 'base.html' %}
 {% block title %}Panel Admin - SecureCode Lab{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h3 class="mb-0">Panel de Administracion</h3>
-    </div>
+    <h3 class="mb-0">Panel de Administracion</h3>
 </div>
 
 <div class="row mb-4">
@@ -38,13 +35,32 @@
                 <a href="{% url 'gestion_usuarios' %}" class="btn btn-sm btn-outline-primary">Ver todos</a>
             </div>
             <div class="card-body border-bottom py-2 px-3">
-                <form method="get" class="d-flex gap-2">
+                <form method="get" class="row g-2">
                     {% if busqueda_analisis %}
                         <input type="hidden" name="q_analisis" value="{{ busqueda_analisis }}">
                     {% endif %}
-                    <input type="text" name="q_usuarios" class="form-control form-control-sm"
-                           placeholder="Buscar usuario..." value="{{ busqueda_usuarios }}">
-                    <button type="submit" class="btn btn-dark btn-sm">Buscar</button>
+                    {% if filtro_clase_analisis %}
+                        <input type="hidden" name="clase_analisis" value="{{ filtro_clase_analisis }}">
+                    {% endif %}
+                    <div class="col-12">
+                        <input type="text" name="q_usuarios" class="form-control form-control-sm"
+                               placeholder="Buscar usuario..." value="{{ busqueda_usuarios }}">
+                    </div>
+                    <div class="col-8">
+                        <select name="clase_usuarios" class="form-select form-select-sm">
+                            <option value="">Todas las clases</option>
+                            {% for valor, etiqueta in clases %}
+                                {% if valor %}
+                                <option value="{{ valor }}" {% if filtro_clase_usuarios == valor %}selected{% endif %}>
+                                    {{ etiqueta }}
+                                </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <button type="submit" class="btn btn-dark btn-sm w-100">Buscar</button>
+                    </div>
                 </form>
             </div>
             <div class="card-body p-0">
@@ -55,6 +71,7 @@
                         <th>Usuario</th>
                         <th>Nombre</th>
                         <th>Rol</th>
+                        <th>Clase</th>
                         <th>Registro</th>
                     </tr>
                     </thead>
@@ -67,11 +84,18 @@
                             {% if u.is_superuser %}
                             <span class="badge bg-danger">Superusuario</span>
                             {% elif u.profile.role == 'admin' %}
-                            <span class="badge bg-danger">Admin</span>
-                            {% elif u.profile.role == 'visitor' %}
-                            <span class="badge bg-info text-dark">Visitante</span>
+                            <span class="badge bg-danger">Profesor</span>
+                            {% elif u.profile.role == 'monitor' %}
+                            <span class="badge bg-info text-dark">Monitor</span>
                             {% else %}
                             <span class="badge bg-secondary">Estudiante</span>
+                            {% endif %}
+                        </td>
+                        <td class="small">
+                            {% if u.profile.role == 'student' or u.profile.role == 'monitor' %}
+                                {{ u.profile.numero_clase|default:"—" }}
+                            {% else %}
+                                <span class="text-muted">—</span>
                             {% endif %}
                         </td>
                         <td><small>{{ u.date_joined|date:"d/m/Y" }}</small></td>
@@ -83,6 +107,39 @@
                 <div class="text-center py-3 text-muted">Sin resultados.</div>
                 {% endif %}
             </div>
+            {% if usuarios_recientes.has_other_pages %}
+            <div class="card-footer bg-white">
+                <nav>
+                    <ul class="pagination pagination-sm justify-content-center mb-0">
+                        {% if usuarios_recientes.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?q_usuarios={{ busqueda_usuarios }}&clase_usuarios={{ filtro_clase_usuarios }}&q_analisis={{ busqueda_analisis }}&clase_analisis={{ filtro_clase_analisis }}&pagina_usuarios={{ usuarios_recientes.previous_page_number }}">Anterior</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+                        {% endif %}
+
+                        {% for num in usuarios_recientes.paginator.page_range %}
+                            {% if usuarios_recientes.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% elif num > usuarios_recientes.number|add:'-3' and num < usuarios_recientes.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?q_usuarios={{ busqueda_usuarios }}&clase_usuarios={{ filtro_clase_usuarios }}&q_analisis={{ busqueda_analisis }}&clase_analisis={{ filtro_clase_analisis }}&pagina_usuarios={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if usuarios_recientes.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?q_usuarios={{ busqueda_usuarios }}&clase_usuarios={{ filtro_clase_usuarios }}&q_analisis={{ busqueda_analisis }}&clase_analisis={{ filtro_clase_analisis }}&pagina_usuarios={{ usuarios_recientes.next_page_number }}">Siguiente</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
         </div>
     </div>
 
@@ -92,13 +149,32 @@
                 <strong>Ultimos analisis del sistema</strong>
             </div>
             <div class="card-body border-bottom py-2 px-3">
-                <form method="get" class="d-flex gap-2">
+                <form method="get" class="row g-2">
                     {% if busqueda_usuarios %}
                         <input type="hidden" name="q_usuarios" value="{{ busqueda_usuarios }}">
                     {% endif %}
-                    <input type="text" name="q_analisis" class="form-control form-control-sm"
-                           placeholder="Buscar proyecto o usuario..." value="{{ busqueda_analisis }}">
-                    <button type="submit" class="btn btn-dark btn-sm">Buscar</button>
+                    {% if filtro_clase_usuarios %}
+                        <input type="hidden" name="clase_usuarios" value="{{ filtro_clase_usuarios }}">
+                    {% endif %}
+                    <div class="col-12">
+                        <input type="text" name="q_analisis" class="form-control form-control-sm"
+                               placeholder="Buscar proyecto o usuario..." value="{{ busqueda_analisis }}">
+                    </div>
+                    <div class="col-8">
+                        <select name="clase_analisis" class="form-select form-select-sm">
+                            <option value="">Todas las clases</option>
+                            {% for valor, etiqueta in clases %}
+                                {% if valor %}
+                                <option value="{{ valor }}" {% if filtro_clase_analisis == valor %}selected{% endif %}>
+                                    {{ etiqueta }}
+                                </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <button type="submit" class="btn btn-dark btn-sm w-100">Buscar</button>
+                    </div>
                 </form>
             </div>
             <div class="card-body p-0">
@@ -108,6 +184,8 @@
                     <tr>
                         <th>Proyecto</th>
                         <th>Usuario</th>
+                        <th>Nombre</th>
+                        <th>Clase</th>
                         <th>Score</th>
                         <th>Fecha</th>
                         <th></th>
@@ -117,11 +195,14 @@
                     {% for analisis in ultimos_analisis %}
                     <tr>
                         <td>{{ analisis.project.name }}</td>
-                        <td>
-                            <small>{{ analisis.project.user.username }}</small><br>
-                            <small class="text-muted">
-                                {{ analisis.project.user.first_name }} {{ analisis.project.user.last_name }}
-                            </small>
+                        <td class="small">{{ analisis.project.user.username }}</td>
+                        <td class="small">{{ analisis.project.user.first_name }} {{ analisis.project.user.last_name }}</td>
+                        <td class="small">
+                            {% if analisis.project.user.profile.role == 'student' %}
+                                {{ analisis.project.user.profile.numero_clase|default:"—" }}
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
                         </td>
                         <td>
                             <span class="badge {% if analisis.score >= 80 %}bg-success{% elif analisis.score >= 60 %}bg-warning text-dark{% else %}bg-danger{% endif %}">

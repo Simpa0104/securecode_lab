@@ -1,22 +1,34 @@
+<!-- dashboard_monitor.html -->
 {% extends 'base.html' %}
 {% block title %}Panel Monitor - SecureCode Lab{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="mb-0">Panel de Monitor</h3>
+    <div>
+        <h3 class="mb-0">Panel de Monitor</h3>
+        {% if clase_monitor %}
+        <span class="text-muted small">Clase asignada: <strong>{{ clase_monitor }}</strong></span>
+        {% else %}
+        <span class="text-muted small">Sin clase asignada — mostrando todos los estudiantes</span>
+        {% endif %}
+    </div>
 </div>
 
 <div class="row mb-4">
     <div class="col-md-6 mb-3">
         <div class="card border-0 shadow-sm text-center p-3">
             <div style="font-size:2rem; font-weight:bold;" class="text-success">{{ total_proyectos }}</div>
-            <div class="text-muted">Proyectos en el sistema</div>
+            <div class="text-muted">
+                Proyectos{% if clase_monitor %} en {{ clase_monitor }}{% endif %}
+            </div>
         </div>
     </div>
     <div class="col-md-6 mb-3">
         <div class="card border-0 shadow-sm text-center p-3">
             <div style="font-size:2rem; font-weight:bold;" class="text-warning">{{ total_analisis }}</div>
-            <div class="text-muted">Analisis ejecutados</div>
+            <div class="text-muted">
+                Analisis{% if clase_monitor %} en {{ clase_monitor }}{% endif %}
+            </div>
         </div>
     </div>
 </div>
@@ -40,6 +52,7 @@
             <tr>
                 <th>Proyecto</th>
                 <th>Estudiante</th>
+                <th>Clase</th>
                 <th>Score</th>
                 <th>Fecha</th>
                 <th></th>
@@ -54,6 +67,9 @@
                     <small class="text-muted">
                         {{ analisis.project.user.first_name }} {{ analisis.project.user.last_name }}
                     </small>
+                </td>
+                <td>
+                    <small>{{ analisis.project.user.profile.numero_clase|default:"—" }}</small>
                 </td>
                 <td>
                     <span class="badge {% if analisis.score >= 80 %}bg-success{% elif analisis.score >= 60 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
@@ -71,7 +87,15 @@
             </tbody>
         </table>
         {% else %}
-        <div class="text-center py-3 text-muted">Sin resultados.</div>
+        <div class="text-center py-3 text-muted">
+            {% if busqueda_analisis %}
+                No se encontraron resultados para "{{ busqueda_analisis }}".
+            {% elif clase_monitor %}
+                No hay analisis registrados para estudiantes de {{ clase_monitor }}.
+            {% else %}
+                Sin analisis registrados.
+            {% endif %}
+        </div>
         {% endif %}
     </div>
 </div>

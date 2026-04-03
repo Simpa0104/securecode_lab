@@ -73,15 +73,15 @@
                         {% if u.is_superuser %}
                             <span class="badge bg-danger">Superusuario</span>
                         {% elif u.profile.role == 'admin' %}
-                            <span class="badge bg-danger">Admin</span>
-                        {% elif u.profile.role == 'visitor' %}
-                            <span class="badge bg-info text-dark">Visitante</span>
+                            <span class="badge bg-danger">Profesor</span>
+                        {% elif u.profile.role == 'monitor' %}
+                            <span class="badge bg-info text-dark">Monitor</span>
                         {% else %}
                             <span class="badge bg-secondary">Estudiante</span>
                         {% endif %}
                     </td>
                     <td class="small">
-                        {% if u.profile.role == 'student' %}
+                        {% if u.profile.role == 'student' or u.profile.role == 'monitor' %}
                             {{ u.profile.numero_clase|default:"—" }}
                         {% else %}
                             <span class="text-muted">—</span>
@@ -100,21 +100,103 @@
                         <a href="{% url 'editar_usuario' u.pk %}"
                            class="btn btn-sm btn-outline-primary me-1">Editar</a>
                         {% if u.pk != request.user.pk %}
-                            <a href="{% url 'eliminar_usuario' u.pk %}"
-                               class="btn btn-sm btn-outline-danger">Eliminar</a>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-danger"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalEliminarUsuario"
+                                data-usuario-id="{{ u.pk }}"
+                                data-usuario-nombre="{{ u.username }}"
+                                data-usuario-proyectos="{{ u.projects.count }}">
+                            Eliminar
+                        </button>
                         {% endif %}
                     </td>
                 </tr>
-                {% endfor %}
-                {% if not usuarios %}
+                {% empty %}
                 <tr>
                     <td colspan="11" class="text-center py-3 text-muted">
                         No se encontraron usuarios con los filtros aplicados.
                     </td>
                 </tr>
-                {% endif %}
+                {% endfor %}
             </tbody>
         </table>
     </div>
+    {% if usuarios.has_other_pages %}
+    <div class="card-footer bg-white">
+        <nav class="mt-2">
+            <ul class="pagination pagination-sm justify-content-center mb-0">
+                {% if usuarios.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?q={{ busqueda }}&clase={{ filtro_clase }}&pagina={{ usuarios.previous_page_number }}">Anterior</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+                {% endif %}
+
+                {% for num in usuarios.paginator.page_range %}
+                    {% if usuarios.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > usuarios.number|add:'-3' and num < usuarios.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ busqueda }}&clase={{ filtro_clase }}&pagina={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if usuarios.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?q={{ busqueda }}&clase={{ filtro_clase }}&pagina={{ usuarios.next_page_number }}">Siguiente</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
 </div>
+
+<!-- Modal eliminar usuario -->
+<div class="modal fade" id="modalEliminarUsuario" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+            <div class="modal-header border-danger">
+                <h5 class="modal-title text-danger">Confirmar eliminacion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Estas a punto de eliminar al usuario <strong id="modal-nombre-usuario"></strong>.</p>
+                <p class="text-muted small mb-1">Esta accion eliminara tambien todos sus proyectos y analisis asociados.</p>
+                <p class="text-muted small">Proyectos asociados: <strong id="modal-proyectos-usuario"></strong></p>
+                <div class="alert alert-danger py-2 small mb-0">
+                    Esta accion no se puede deshacer.
+                </div>
+            </div>
+            <div class="modal-footer" style="border-color: var(--border-color);">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="form-eliminar-usuario" method="post" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Si, eliminar usuario</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const modalEliminar = document.getElementById('modalEliminarUsuario');
+    modalEliminar.addEventListener('show.bs.modal', function (event) {
+        const boton = event.relatedTarget;
+        const usuarioId = boton.getAttribute('data-usuario-id');
+        const usuarioNombre = boton.getAttribute('data-usuario-nombre');
+        const usuarioProyectos = boton.getAttribute('data-usuario-proyectos');
+
+        document.getElementById('modal-nombre-usuario').textContent = usuarioNombre;
+        document.getElementById('modal-proyectos-usuario').textContent = usuarioProyectos;
+        document.getElementById('form-eliminar-usuario').action = '/usuarios/' + usuarioId + '/eliminar/';
+    });
+</script>
 {% endblock %}

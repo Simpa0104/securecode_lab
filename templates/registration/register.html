@@ -4,7 +4,7 @@
 {% block navbar %}{% endblock %}
 
 {% block content %}
-<div style="max-width: 480px; margin: 2rem auto;">
+<div style="max-width: 500px; margin: 2rem auto;">
     <div class="text-center mb-4">
         <h4 class="mt-2">Crear cuenta en SecureCode Lab</h4>
         <p class="text-muted small">Plataforma educativa de analisis de seguridad</p>
@@ -16,39 +16,37 @@
                 {% csrf_token %}
 
                 {% for field in form %}
-                {% if field.html_name == 'numero_clase' %}
-                {# Este campo se maneja aparte abajo #}
-                {% else %}
-                <div class="mb-3" {% if field.html_name==
-                'grupo' %}id="div_grupo"{% endif %}>
-                <label class="form-label fw-semibold">{{ field.label }}</label>
-                {{ field }}
-                {% if field.help_text %}
-                <div class="form-text">{{ field.help_text }}</div>
-                {% endif %}
-                {% for error in field.errors %}
-                <div class="text-danger small mt-1">{{ error }}</div>
+                    {% if field.html_name == 'numero_clase' %}
+                    {% else %}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                        <div class="form-text">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% for error in field.errors %}
+                        <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 {% endfor %}
-        </div>
-        {% endif %}
-        {% endfor %}
 
-        <div class="mb-3" id="div_numero_clase" style="display:none;">
-            <label class="form-label fw-semibold">{{ form.numero_clase.label }}</label>
-            {{ form.numero_clase }}
-            {% for error in form.numero_clase.errors %}
-            <div class="text-danger small mt-1">{{ error }}</div>
-            {% endfor %}
-        </div>
+                <div class="mb-3" id="div_numero_clase" style="display:none;">
+                    <label class="form-label fw-semibold">{{ form.numero_clase.label }}</label>
+                    {{ form.numero_clase }}
+                    {% for error in form.numero_clase.errors %}
+                    <div class="text-danger small mt-1">{{ error }}</div>
+                    {% endfor %}
+                </div>
 
-        <button type="submit" class="btn btn-dark w-100 mt-2">Registrarse</button>
-        </form>
-        <hr>
-        <p class="text-center text-muted small mb-0">
-            ¿Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesion</a>
-        </p>
+                <button type="submit" class="btn btn-dark w-100 mt-2">Registrarse</button>
+            </form>
+            <hr>
+            <p class="text-center text-muted small mb-0">
+                ¿Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesion</a>
+            </p>
+        </div>
     </div>
-</div>
 </div>
 {% endblock %}
 
@@ -67,7 +65,7 @@
 
     if (grupoSelect) {
         grupoSelect.addEventListener('change', toggleClase);
-        toggleClase(); // ejecutar al cargar por si hay valor preseleccionado
+        toggleClase();
     }
 </script>
 {% endblock %}

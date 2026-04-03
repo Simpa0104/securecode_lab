@@ -1,3 +1,4 @@
+<!-- login.html -->
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}SecureCode Lab — Iniciar sesión{% endblock %}
@@ -196,8 +197,11 @@
                 <button type="submit" class="btn btn-login w-100 mt-2">Entrar</button>
             </form>
             <hr class="my-3">
+            <p class="text-center text-muted small mb-1">
+                <a href="{% url 'password_reset' %}">Olvide mi contraseña</a>
+            </p>
             <p class="text-center text-muted small mb-0">
-                ¿No tienes cuenta? <a href="{% url 'register' %}">Regístrate aquí</a>
+                ¿No tienes cuenta? <a href="{% url 'register' %}">Registrate aqui</a>
             </p>
         </div>
     </div>

@@ -1,3 +1,4 @@
+<!-- historial.html -->
 {% extends 'base.html' %}
 {% block title %}Historial - SecureCode Lab{% endblock %}
 
@@ -8,45 +9,48 @@
 <a href="{% url 'project_detail' proyecto.pk %}" class="text-muted small">← Volver al proyecto</a>
 {% endif %}
 
-<h2 class="mt-2 mb-1">Historial de análisis</h2>
-<p class="text-muted mb-4">
-    {{ proyecto.name }}
-    {% if user.is_superuser or user.profile.role == 'admin' %}
-    <span class="small">— Usuario: {{ proyecto.user.username }}</span>
-    {% endif %}
-</p>
+<h2> por esto: #}
+    <h2 class="mt-2 mb-1">Historial de analisis</h2>
+    <p class="text-muted mb-4">
+        {{ proyecto.name }}
+        {% if user.is_superuser or user.profile.role == 'admin' %}
+        <span class="small">— Usuario: {{ proyecto.user.username }}</span>
+        {% endif %}
+        <span class="badge bg-secondary ms-2">{{ analisis_list|length }} analisis</span>
+    </p>
 
-{% if analisis_list %}
-<table class="table table-hover shadow-sm">
-    <thead class="table-dark">
-    <tr>
-        <th>#</th>
-        <th>Fecha</th>
-        <th>Score</th>
-        <th>Nivel</th>
-        <th>Vulnerabilidades</th>
-        <th>Acción</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for analisis in analisis_list %}
-    <tr>
-        <td>{{ forloop.counter }}</td>
-        <td>{{ analisis.fecha|date:"d/m/Y H:i" }}</td>
-        <td>
-            <strong class="{% if analisis.score >= 80 %}text-success{% elif analisis.score >= 60 %}text-warning{% else %}text-danger{% endif %}">
-                {{ analisis.score }}/100
-            </strong>
-        </td>
-        <td>{{ analisis.nivel }}</td>
-        <td>{{ analisis.vulnerabilidades.count }}</td>
-        <td><a href="{% url 'analisis_resultado' analisis.pk %}" class="btn btn-sm btn-outline-primary">Ver reporte</a>
-        </td>
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<div class="alert alert-info">Este proyecto aún no tiene análisis ejecutados.</div>
-{% endif %}
-{% endblock %}
+    {% if analisis_list %}
+    <table class="table table-hover shadow-sm">
+        <thead class="table-dark">
+        <tr>
+            <th>#</th>
+            <th>Fecha</th>
+            <th>Score</th>
+            <th>Nivel</th>
+            <th>Vulnerabilidades</th>
+            <th>Acción</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for analisis in analisis_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ analisis.fecha|date:"d/m/Y H:i" }}</td>
+            <td>
+                <strong class="{% if analisis.score >= 80 %}text-success{% elif analisis.score >= 60 %}text-warning{% else %}text-danger{% endif %}">
+                    {{ analisis.score }}/100
+                </strong>
+            </td>
+            <td>{{ analisis.nivel }}</td>
+            <td>{{ analisis.vulnerabilidades.count }}</td>
+            <td><a href="{% url 'analisis_resultado' analisis.pk %}" class="btn btn-sm btn-outline-primary">Ver
+                reporte</a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-info">Este proyecto aún no tiene análisis ejecutados.</div>
+    {% endif %}
+    {% endblock %}

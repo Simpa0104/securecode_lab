@@ -1,10 +1,21 @@
 {% extends 'base.html' %}
-{% block title %}Mis Proyectos - SecureCode Lab{% endblock %}
+{% block title %}Proyectos - SecureCode Lab{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Mis Proyectos</h2>
+    <h2>Proyectos</h2>
     <a href="{% url 'project_create' %}" class="btn btn-primary">+ Nuevo proyecto</a>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body py-3">
+        <form method="get" class="d-flex gap-2">
+            <input type="text" name="q" class="form-control form-control-sm"
+                   placeholder="Buscar por nombre o descripcion..."
+                   value="{{ busqueda }}">
+            <button type="submit" class="btn btn-dark btn-sm">Buscar</button>
+        </form>
+    </div>
 </div>
 
 {% if projects %}
@@ -14,29 +25,125 @@
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
                 <h5 class="card-title">{{ project.name }}</h5>
-                <p class="card-text text-muted">{{ project.description|default:"Sin descripción" }}</p>
+                <p class="card-text text-muted">
+                    {{ project.description|default:"Sin descripcion" }}
+                </p>
                 <small class="text-muted">
-                    Subido el {{ project.created_at|date:"d/m/Y H:i" }} — {{ project.get_file_size_kb }} KB
+                    Subido el {{ project.created_at|date:"d/m/Y H:i" }}
                 </small>
             </div>
             <div class="card-footer bg-white d-flex justify-content-between align-items-center">
-                {% if project.status == 'pending' %}<span class="badge bg-warning text-dark">Pendiente</span>
-                {% elif project.status == 'analyzed' %}<span class="badge bg-success">Analizado</span>
-                {% else %}<span class="badge bg-danger">Error</span>{% endif %}
+                {% if project.status == 'pending' %}
+                    <span class="badge bg-warning text-dark">Pendiente</span>
+                {% elif project.status == 'analyzed' %}
+                    <span class="badge bg-success">Analizado</span>
+                {% else %}
+                    <span class="badge bg-danger">Error</span>
+                {% endif %}
                 <div>
-                    <a href="{% url 'project_detail' project.pk %}" class="btn btn-sm btn-outline-primary">Ver</a>
-                    <a href="{% url 'project_delete' project.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                    <a href="{% url 'project_detail' project.pk %}"
+                       class="btn btn-sm btn-outline-primary">Ver</a>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalEliminarProyecto"
+                            data-proyecto-id="{{ project.pk }}"
+                            data-proyecto-nombre="{{ project.name }}">
+                        Eliminar
+                    </button>
                 </div>
             </div>
         </div>
     </div>
     {% endfor %}
 </div>
+
+<div class="mt-2">
+    {% if projects.has_other_pages %}
+    <nav>
+        <ul class="pagination pagination-sm justify-content-center mb-0">
+            {% if projects.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?q={{ busqueda }}&pagina={{ projects.previous_page_number }}">Anterior</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+            {% endif %}
+
+            {% for num in projects.paginator.page_range %}
+                {% if projects.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% elif num > projects.number|add:'-3' and num < projects.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?q={{ busqueda }}&pagina={{ num }}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if projects.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?q={{ busqueda }}&pagina={{ projects.next_page_number }}">Siguiente</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
 {% else %}
 <div class="text-center py-5 text-muted">
-    <h5>Aún no tienes proyectos</h5>
-    <p>Sube tu primer proyecto para comenzar el análisis de seguridad.</p>
-    <a href="{% url 'project_create' %}" class="btn btn-primary">Subir proyecto</a>
+    {% if busqueda %}
+        <h5>Sin resultados para "{{ busqueda }}"</h5>
+        <a href="{% url 'project_list' %}" class="btn btn-outline-secondary btn-sm mt-2">
+            Limpiar busqueda
+        </a>
+    {% else %}
+        <h5>Aun no tienes proyectos</h5>
+        <p>Sube tu primer proyecto para comenzar el analisis de seguridad.</p>
+        <a href="{% url 'project_create' %}" class="btn btn-primary">Subir proyecto</a>
+    {% endif %}
 </div>
 {% endif %}
+
+<!-- Modal eliminar proyecto -->
+<div class="modal fade" id="modalEliminarProyecto" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+            <div class="modal-header border-danger">
+                <h5 class="modal-title text-danger">Confirmar eliminacion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Estas a punto de eliminar el proyecto <strong id="modal-nombre-proyecto"></strong>.</p>
+                <p class="text-muted small">Esta accion eliminara tambien todos los analisis asociados a este proyecto.</p>
+                <div class="alert alert-danger py-2 small mb-0">
+                    Esta accion no se puede deshacer.
+                </div>
+            </div>
+            <div class="modal-footer" style="border-color: var(--border-color);">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="form-eliminar-proyecto" method="post" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Si, eliminar proyecto</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const modalProyecto = document.getElementById('modalEliminarProyecto');
+    modalProyecto.addEventListener('show.bs.modal', function (event) {
+        const boton = event.relatedTarget;
+        const proyectoId = boton.getAttribute('data-proyecto-id');
+        const proyectoNombre = boton.getAttribute('data-proyecto-nombre');
+
+        document.getElementById('modal-nombre-proyecto').textContent = proyectoNombre;
+        document.getElementById('form-eliminar-proyecto').action = '/projects/' + proyectoId + '/eliminar/';
+    });
+</script>
 {% endblock %}
