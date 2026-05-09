@@ -1,4 +1,3 @@
-# users/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -6,6 +5,8 @@ from django.contrib import messages
 from django.db.models import Q
 from django.core.paginator import Paginator
 from django.contrib.auth import update_session_auth_hash
+from django.http import JsonResponse
+import json
 from .forms import RegisterForm
 from .models import Profile
 from projects.models import Project
@@ -26,6 +27,11 @@ def es_monitor(user):
         return user.profile.role == 'monitor'
     except Profile.DoesNotExist:
         return False
+
+
+def sin_permiso(request):
+    """Renderiza la pagina actual con el modal de acceso denegado activo."""
+    return render(request, 'base.html', {'mostrar_modal_permiso': True})
 
 
 @login_required
@@ -80,9 +86,9 @@ def dashboard_monitor(request):
 
     if clase_monitor:
         estudiantes_ids = User.objects.filter(
-            profile__role='student',
+            profile__role__in=['student', 'monitor'],
             profile__numero_clase=clase_monitor
-        ).values_list('id', flat=True)
+        ).exclude(pk=request.user.pk).values_list('id', flat=True)
 
         analisis_qs = Analisis.objects.filter(
             project__user__id__in=estudiantes_ids
@@ -94,9 +100,11 @@ def dashboard_monitor(request):
     else:
         analisis_qs = Analisis.objects.select_related(
             'project', 'project__user'
-        ).filter(project__user__profile__role='student')
+        ).filter(
+            project__user__profile__role__in=['student', 'monitor']
+        ).exclude(project__user=request.user)
 
-        total_proyectos = Project.objects.count()
+        total_proyectos = Project.objects.exclude(user=request.user).count()
 
     total_analisis = analisis_qs.count()
 
@@ -122,9 +130,8 @@ def dashboard_monitor(request):
 @login_required
 def dashboard_admin(request):
     if not es_admin(request.user):
-        if es_monitor(request.user):
-            return redirect('dashboard_monitor')
-        return redirect('dashboard_estudiante')
+        return render(request, 'users/dashboard_monitor.html' if es_monitor(request.user) else 'users/dashboard_estudiante.html',
+                    {'mostrar_modal_permiso': True})
 
     busqueda_usuarios = request.GET.get('q_usuarios', '').strip()
     busqueda_analisis = request.GET.get('q_analisis', '').strip()
@@ -183,9 +190,7 @@ def dashboard_admin(request):
 @login_required
 def gestion_usuarios(request):
     if not es_admin(request.user):
-        if es_monitor(request.user):
-            return redirect('dashboard_monitor')
-        return redirect('dashboard_estudiante')
+        return render(request, 'base.html', {'mostrar_modal_permiso': True})
 
     busqueda = request.GET.get('q', '').strip()
     filtro_clase = request.GET.get('clase', '').strip()
@@ -218,9 +223,7 @@ def gestion_usuarios(request):
 @login_required
 def editar_usuario(request, user_pk):
     if not es_admin(request.user):
-        if es_monitor(request.user):
-            return redirect('dashboard_monitor')
-        return redirect('dashboard_estudiante')
+        return render(request, 'base.html', {'mostrar_modal_permiso': True})
 
     usuario = get_object_or_404(User, pk=user_pk)
     es_mismo_usuario = usuario.pk == request.user.pk
@@ -281,9 +284,7 @@ def editar_usuario(request, user_pk):
 @login_required
 def eliminar_usuario(request, user_pk):
     if not es_admin(request.user):
-        if es_monitor(request.user):
-            return redirect('dashboard_monitor')
-        return redirect('dashboard_estudiante')
+        return render(request, 'base.html', {'mostrar_modal_permiso': True})
 
     usuario = get_object_or_404(User, pk=user_pk)
 
@@ -301,45 +302,128 @@ def eliminar_usuario(request, user_pk):
 
 
 @login_required
+def usuario_json(request, user_pk):
+    if not es_admin(request.user):
+        return JsonResponse({'error': 'Sin permiso'}, status=403)
+
+    usuario = get_object_or_404(User, pk=user_pk)
+    profile, _ = Profile.objects.get_or_create(
+        user=usuario,
+        defaults={'role': 'student'}
+    )
+
+    return JsonResponse({
+        'id': usuario.pk,
+        'username': usuario.username,
+        'email': usuario.email,
+        'first_name': usuario.first_name,
+        'last_name': usuario.last_name,
+        'role': profile.role,
+        'numero_clase': profile.numero_clase,
+        'is_active': usuario.is_active,
+        'es_mismo_usuario': usuario.pk == request.user.pk,
+    })
+
+
+@login_required
+def editar_usuario_modal(request, user_pk):
+    if not es_admin(request.user):
+        return JsonResponse({'error': 'Sin permiso'}, status=403)
+
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Metodo no permitido'}, status=405)
+
+    usuario = get_object_or_404(User, pk=user_pk)
+    es_mismo_usuario = usuario.pk == request.user.pk
+
+    profile, _ = Profile.objects.get_or_create(
+        user=usuario,
+        defaults={'role': 'student'}
+    )
+
+    nuevo_username = request.POST.get('username', '').strip()
+    nuevo_email = request.POST.get('email', '').strip()
+    nuevo_rol = request.POST.get('role')
+    nuevo_numero_clase = request.POST.get('numero_clase', '')
+    activo = request.POST.get('is_active') == 'on'
+
+    errores = {}
+
+    if not nuevo_username:
+        errores['username'] = 'El nombre de usuario no puede estar vacio.'
+
+    if nuevo_username and User.objects.filter(
+        username=nuevo_username
+    ).exclude(pk=usuario.pk).exists():
+        errores['username'] = f'El nombre de usuario "{nuevo_username}" ya esta en uso.'
+
+    if errores:
+        return JsonResponse({'ok': False, 'errores': errores})
+
+    usuario.username = nuevo_username
+    usuario.email = nuevo_email
+
+    if not es_mismo_usuario:
+        usuario.is_active = activo
+
+    usuario.save()
+
+    if nuevo_rol in ['student', 'monitor', 'admin']:
+        profile.role = nuevo_rol
+
+    profile.numero_clase = nuevo_numero_clase if nuevo_rol in ['student', 'monitor'] else ''
+    profile.save()
+
+    return JsonResponse({
+        'ok': True,
+        'mensaje': f'Usuario "{nuevo_username}" actualizado correctamente.',
+        'usuario': {
+            'id': usuario.pk,
+            'username': usuario.username,
+            'email': usuario.email,
+            'first_name': usuario.first_name,
+            'last_name': usuario.last_name,
+            'role': profile.role,
+            'numero_clase': profile.numero_clase,
+            'is_active': usuario.is_active,
+        }
+    })
+
+
+@login_required
 def perfil(request):
     if request.method == 'POST':
         accion = request.POST.get('accion')
 
         if accion == 'datos':
-            nuevo_nombre = request.POST.get('first_name', '').strip()
-            nuevo_apellido = request.POST.get('last_name', '').strip()
-            nuevo_email = request.POST.get('email', '').strip()
-
-            request.user.first_name = nuevo_nombre
-            request.user.last_name = nuevo_apellido
-            request.user.email = nuevo_email
+            request.user.first_name = request.POST.get('first_name', '').strip()
+            request.user.last_name = request.POST.get('last_name', '').strip()
+            request.user.email = request.POST.get('email', '').strip()
             request.user.save()
-
             messages.success(request, 'Datos actualizados correctamente.')
             return redirect('perfil')
 
-        elif accion == 'contrasena':
-            contrasena_actual = request.POST.get('contrasena_actual', '')
-            contrasena_nueva = request.POST.get('contrasena_nueva', '')
-            contrasena_confirmar = request.POST.get('contrasena_confirmar', '')
+        elif accion == 'contraseña':
+            contraseña_actual = request.POST.get('contraseña_actual', '')
+            contraseña_nueva = request.POST.get('contraseña_nueva', '')
+            contraseña_confirmar = request.POST.get('contraseña_confirmar', '')
 
-            if not request.user.check_password(contrasena_actual):
-                messages.error(request, 'La contrasena actual es incorrecta.')
+            if not request.user.check_password(contraseña_actual):
+                messages.error(request, 'La contraseña actual es incorrecta.')
                 return redirect('perfil')
 
-            if len(contrasena_nueva) < 8:
-                messages.error(request, 'La nueva contrasena debe tener al menos 8 caracteres.')
+            if len(contraseña_nueva) < 8:
+                messages.error(request, 'La nueva contraseña debe tener al menos 8 caracteres.')
                 return redirect('perfil')
 
-            if contrasena_nueva != contrasena_confirmar:
-                messages.error(request, 'Las contrasenas nuevas no coinciden.')
+            if contraseña_nueva != contraseña_confirmar:
+                messages.error(request, 'Las contraseñas nuevas no coinciden.')
                 return redirect('perfil')
 
-            request.user.set_password(contrasena_nueva)
+            request.user.set_password(contraseña_nueva)
             request.user.save()
             update_session_auth_hash(request, request.user)
-
-            messages.success(request, 'Contrasena actualizada correctamente.')
+            messages.success(request, 'Contraseña actualizada correctamente.')
             return redirect('perfil')
 
     return render(request, 'users/perfil.html')

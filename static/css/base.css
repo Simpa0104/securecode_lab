@@ -1,4 +1,3 @@
-/* static/css/base.css */
 :root {
     --bg-primary:     #0f1923;
     --bg-card:        #16213e;
@@ -16,35 +15,25 @@
 
 body {
     background-color: var(--bg-primary);
+    background-image: url('../img/background.svg');
+    background-size: cover;
+    background-attachment: fixed;
     color: var(--text-primary);
     display: flex;
     flex-direction: column;
     min-height: 100vh;
 }
 
-main {
-    flex: 1;
-}
+main { flex: 1; }
 
-h1, h2, h3, h4, h5, h6 {
-    color: var(--text-primary);
-}
+h1, h2, h3, h4, h5, h6 { color: var(--text-primary); }
 
-p, li, span, small, label {
-    color: var(--text-secondary);
-}
+p, li, span, small, label { color: var(--text-secondary); }
 
-a {
-    color: #7eb3f5;
-}
+a { color: #7eb3f5; }
+a:hover { color: #aecfff; }
 
-a:hover {
-    color: #aecfff;
-}
-
-.text-muted {
-    color: var(--text-muted) !important;
-}
+.text-muted { color: var(--text-muted) !important; }
 
 .navbar {
     background-color: var(--navbar-bg) !important;
@@ -57,9 +46,7 @@ a:hover {
     color: var(--text-primary) !important;
 }
 
-.nav-link {
-    color: var(--text-secondary) !important;
-}
+.nav-link { color: var(--text-secondary) !important; }
 
 .nav-link:hover,
 .nav-link.active {
@@ -75,9 +62,7 @@ a:hover {
     border-top: 1px solid var(--border-color);
 }
 
-.footer strong {
-    color: var(--text-secondary);
-}
+.footer strong { color: var(--text-secondary); }
 
 .card {
     background-color: var(--bg-card);
@@ -89,7 +74,7 @@ a:hover {
 .card-header {
     background-color: var(--bg-card-alt) !important;
     border-bottom: 1px solid var(--border-color);
-    color: var(--text-primary);
+    color: var(--text-primary) !important;
 }
 
 .card-footer {
@@ -100,11 +85,24 @@ a:hover {
 .table {
     color: var(--text-primary);
     --bs-table-bg: transparent;
+    --bs-table-color: var(--text-primary);
     --bs-table-hover-bg: rgba(255, 255, 255, 0.05);
+    --bs-table-hover-color: var(--text-primary);
+    --bs-table-striped-color: var(--text-primary);
+    --bs-table-active-color: var(--text-primary);
+}
+
+.table td,
+.table th,
+.table tbody td,
+.table tbody th {
+    border-color: var(--border-color);
+    color: var(--text-primary) !important;
 }
 
 .table-dark {
     --bs-table-bg: var(--bg-card-alt);
+    --bs-table-color: var(--text-primary);
 }
 
 .table-light,
@@ -112,10 +110,6 @@ a:hover {
     background-color: var(--bg-card-alt) !important;
     color: var(--text-secondary) !important;
     border-color: var(--border-color) !important;
-}
-
-.table td, .table th {
-    border-color: var(--border-color);
 }
 
 .form-control,
@@ -133,17 +127,9 @@ a:hover {
     box-shadow: 0 0 0 0.2rem rgba(74, 127, 193, 0.25);
 }
 
-.form-control::placeholder {
-    color: var(--text-muted);
-}
-
-.form-text {
-    color: var(--text-muted);
-}
-
-.form-check-label {
-    color: var(--text-secondary);
-}
+.form-control::placeholder { color: var(--text-muted); }
+.form-text { color: var(--text-muted); }
+.form-check-label { color: var(--text-secondary); }
 
 .alert-light {
     background-color: var(--bg-card-alt);
@@ -175,9 +161,7 @@ a:hover {
     color: #f07080;
 }
 
-.bg-light {
-    background-color: var(--bg-card-alt) !important;
-}
+.bg-light { background-color: var(--bg-card-alt) !important; }
 
 .btn-outline-primary {
     color: #7eb3f5;
@@ -219,16 +203,56 @@ a:hover {
     color: var(--text-primary);
 }
 
+.btn-outline-light {
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+.btn-outline-light:hover {
+    background-color: var(--border-color);
+    color: var(--text-primary);
+}
+
 .list-group-item {
     background-color: var(--bg-card);
     border-color: var(--border-color);
     color: var(--text-primary);
 }
 
-.list-group-item:hover {
+.list-group-item:hover { background-color: var(--bg-card-alt); }
+
+hr { border-color: var(--border-color); }
+
+.pagination .page-link {
     background-color: var(--bg-card-alt);
+    border-color: var(--border-color);
+    color: var(--text-secondary);
 }
 
-hr {
+.pagination .page-link:hover {
+    background-color: var(--bg-input);
+    color: var(--text-primary);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #4a7fc1;
+    border-color: #4a7fc1;
+    color: white;
+}
+
+.pagination .page-item.disabled .page-link {
+    background-color: var(--bg-card-alt);
+    border-color: var(--border-color);
+    color: var(--text-muted);
+}
+
+.modal-content {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.modal-header,
+.modal-footer {
     border-color: var(--border-color);
 }

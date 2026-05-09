@@ -1,4 +1,3 @@
-<!-- project_detail.html -->
 {% extends 'base.html' %}
 {% block title %}{{ project.name }} - SecureCode Lab{% endblock %}
 
@@ -46,7 +45,7 @@
                         <td>{{ analisis.vulnerabilidades.count }}</td>
                         <td>
                             <a href="{% url 'analisis_resultado' analisis.pk %}"
-                               class="btn btn-sm btn-outline-primary">Ver reporte</a>
+                            class="btn btn-sm btn-outline-primary">Ver reporte</a>
                         </td>
                     </tr>
                     {% endfor %}

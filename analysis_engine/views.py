@@ -1,13 +1,28 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Analisis
-from users.views import es_admin
+from users.views import es_admin, es_monitor
 
 
 @login_required
 def resultado(request, analisis_pk):
     if es_admin(request.user):
         analisis = get_object_or_404(Analisis, pk=analisis_pk)
+    elif es_monitor(request.user):
+        from users.models import Profile
+        try:
+            clase_monitor = request.user.profile.numero_clase
+        except Profile.DoesNotExist:
+            clase_monitor = ''
+
+        if clase_monitor:
+            analisis = get_object_or_404(
+                Analisis,
+                pk=analisis_pk,
+                project__user__profile__numero_clase=clase_monitor
+            )
+        else:
+            analisis = get_object_or_404(Analisis, pk=analisis_pk)
     else:
         analisis = get_object_or_404(Analisis, pk=analisis_pk, project__user=request.user)
 
@@ -33,12 +48,15 @@ def resultado(request, analisis_pk):
         nivel_color = 'danger'
         nivel_texto = 'Critico'
 
+    es_proyecto_propio = analisis.project.user == request.user
+
     return render(request, 'analysis_engine/resultado.html', {
         'analisis':         analisis,
         'vulnerabilidades': vulnerabilidades,
         'resumen':          resumen,
         'nivel_color':      nivel_color,
         'nivel_texto':      nivel_texto,
+        'es_proyecto_propio': es_proyecto_propio,
     })
 
 

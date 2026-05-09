@@ -12,21 +12,76 @@
 
     <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
-            <form method="post">
+            <form method="post" id="form-registro" novalidate>
                 {% csrf_token %}
 
                 {% for field in form %}
                     {% if field.html_name == 'numero_clase' %}
                     {% else %}
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">{{ field.label }}</label>
-                        {{ field }}
-                        {% if field.help_text %}
+                        <label class="form-label fw-semibold" for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+                        {% if field.html_name == 'username' %}
+                            <input type="text" name="username" id="id_username"
+                                class="form-control {% if field.errors %}is-invalid{% endif %}"
+                                value="{{ field.value|default:'' }}"
+                                maxlength="150" autocomplete="off">
+                            <div class="valid-feedback">Nombre de usuario disponible.</div>
+                            <div class="invalid-feedback" id="error-username">
+                                {% for error in field.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% elif field.html_name == 'first_name' %}
+                            <input type="text" name="first_name" id="id_first_name"
+                                class="form-control {% if field.errors %}is-invalid{% endif %}"
+                                value="{{ field.value|default:'' }}">
+                            <div class="valid-feedback">Perfecto.</div>
+                            <div class="invalid-feedback">Ingresa tu nombre.</div>
+                        {% elif field.html_name == 'last_name' %}
+                            <input type="text" name="last_name" id="id_last_name"
+                                class="form-control {% if field.errors %}is-invalid{% endif %}"
+                                value="{{ field.value|default:'' }}">
+                            <div class="valid-feedback">Perfecto.</div>
+                            <div class="invalid-feedback">Ingresa tus apellidos.</div>
+                        {% elif field.html_name == 'email' %}
+                            <input type="email" name="email" id="id_email"
+                                class="form-control {% if field.errors %}is-invalid{% endif %}"
+                                value="{{ field.value|default:'' }}">
+                            <div class="valid-feedback">Correo valido.</div>
+                            <div class="invalid-feedback">Ingresa un correo electronico valido.</div>
+                        {% elif field.html_name == 'password1' %}
+                            <input type="password" name="password1" id="id_password1"
+                                class="form-control {% if field.errors %}is-invalid{% endif %}">
+                            <div class="valid-feedback">Contraseña valida.</div>
+                            <div class="invalid-feedback" id="error-password1">
+                                {% for error in field.errors %}{{ error }}{% endfor %}
+                            </div>
+                            <div id="requisitos-contraseña" class="mt-2" style="display:none;">
+                                <div class="form-text" id="req-longitud">Minimo 8 caracteres</div>
+                                <div class="form-text" id="req-numerica">No puede ser completamente numerica</div>
+                            </div>
+                        {% elif field.html_name == 'password2' %}
+                            <input type="password" name="password2" id="id_password2"
+                                class="form-control {% if field.errors %}is-invalid{% endif %}">
+                            <div class="valid-feedback">Las contraseñas coinciden.</div>
+                            <div class="invalid-feedback" id="error-password2">
+                                {% for error in field.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% elif field.html_name == 'grupo' %}
+                            {{ field }}
+                            {% for error in field.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        {% else %}
+                            {{ field }}
+                            {% for error in field.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+
+                        {% if field.help_text and field.html_name != 'password1' %}
                         <div class="form-text">{{ field.help_text }}</div>
                         {% endif %}
-                        {% for error in field.errors %}
-                        <div class="text-danger small mt-1">{{ error }}</div>
-                        {% endfor %}
                     </div>
                     {% endif %}
                 {% endfor %}
@@ -39,7 +94,9 @@
                     {% endfor %}
                 </div>
 
-                <button type="submit" class="btn btn-dark w-100 mt-2">Registrarse</button>
+                <button type="submit" class="btn btn-dark w-100 mt-2" id="btn-registrar">
+                    Registrarse
+                </button>
             </form>
             <hr>
             <p class="text-center text-muted small mb-0">
@@ -52,20 +109,137 @@
 
 {% block extra_js %}
 <script>
-    const grupoSelect = document.getElementById('id_grupo');
-    const divClase = document.getElementById('div_numero_clase');
+// ── Helpers ───────────────────────────────────────────────
+function marcarValido(campo) {
+    campo.classList.remove('is-invalid');
+    campo.classList.add('is-valid');
+}
 
-    function toggleClase() {
-        if (grupoSelect && grupoSelect.value === 'student') {
-            divClase.style.display = 'block';
-        } else {
-            divClase.style.display = 'none';
-        }
+function marcarInvalido(campo) {
+    campo.classList.remove('is-valid');
+    campo.classList.add('is-invalid');
+}
+
+function limpiar(campo) {
+    campo.classList.remove('is-valid', 'is-invalid');
+}
+
+// ── Campos ────────────────────────────────────────────────
+const username  = document.getElementById('id_username');
+const firstName = document.getElementById('id_first_name');
+const lastName  = document.getElementById('id_last_name');
+const email     = document.getElementById('id_email');
+const password1 = document.getElementById('id_password1');
+const password2 = document.getElementById('id_password2');
+const grupoSelect = document.getElementById('id_grupo');
+const divClase  = document.getElementById('div_numero_clase');
+const btnRegistrar = document.getElementById('btn-registrar');
+
+// ── Username ──────────────────────────────────────────────
+username.addEventListener('input', function() {
+    const val = this.value.trim();
+    if (val.length === 0) { limpiar(this); return; }
+    if (val.length < 3) {
+        marcarInvalido(this);
+        document.getElementById('error-username').textContent = 'Minimo 3 caracteres.';
+    } else if (!/^[\w.@+\-]+$/.test(val)) {
+        marcarInvalido(this);
+        document.getElementById('error-username').textContent = 'Solo letras, digitos y @/./+/-/_';
+    } else {
+        marcarValido(this);
+        document.getElementById('error-username').textContent = '';
+    }
+});
+
+// ── Nombre y Apellido ─────────────────────────────────────
+firstName.addEventListener('input', function() {
+    this.value.trim().length > 0 ? marcarValido(this) : limpiar(this);
+});
+
+lastName.addEventListener('input', function() {
+    this.value.trim().length > 0 ? marcarValido(this) : limpiar(this);
+});
+
+// ── Email ─────────────────────────────────────────────────
+email.addEventListener('input', function() {
+    const val = this.value.trim();
+    if (val.length === 0) { limpiar(this); return; }
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) ? marcarValido(this) : marcarInvalido(this);
+});
+
+// ── Password1 ─────────────────────────────────────────────
+const reqLongitud = document.getElementById('req-longitud');
+const reqNumerica = document.getElementById('req-numerica');
+const requisitos  = document.getElementById('requisitos-contraseña');
+
+password1.addEventListener('focus', () => requisitos.style.display = 'block');
+password1.addEventListener('blur',  () => { if (!password1.value) requisitos.style.display = 'none'; });
+
+password1.addEventListener('input', function() {
+    const val = this.value;
+    if (val.length === 0) { limpiar(this); return; }
+
+    requisitos.style.display = 'block';
+
+    const ok8 = val.length >= 8;
+    const okNum = !/^\d+$/.test(val);
+
+    reqLongitud.style.color = ok8 ? '#75c596' : '#f07080';
+    reqNumerica.style.color = okNum ? '#75c596' : '#f07080';
+
+    ok8 && okNum ? marcarValido(this) : marcarInvalido(this);
+
+    // Re-validar confirmacion si ya tiene algo
+    if (password2.value) validarConfirmacion();
+});
+
+// ── Password2 ─────────────────────────────────────────────
+function validarConfirmacion() {
+    if (password2.value.length === 0) { limpiar(password2); return; }
+    password1.value === password2.value ? marcarValido(password2) : marcarInvalido(password2);
+}
+
+password2.addEventListener('input', validarConfirmacion);
+
+// ── Grupo / Clase ─────────────────────────────────────────
+function toggleClase() {
+    if (grupoSelect && grupoSelect.value === 'student') {
+        divClase.style.display = 'block';
+    } else {
+        divClase.style.display = 'none';
+    }
+}
+if (grupoSelect) {
+    grupoSelect.addEventListener('change', toggleClase);
+    toggleClase();
+}
+
+// ── Submit: validacion final del lado del cliente ─────────
+document.getElementById('form-registro').addEventListener('submit', function(e) {
+    let valido = true;
+
+    if (username.value.trim().length < 3) {
+        marcarInvalido(username);
+        document.getElementById('error-username').textContent = 'Minimo 3 caracteres.';
+        valido = false;
     }
 
-    if (grupoSelect) {
-        grupoSelect.addEventListener('change', toggleClase);
-        toggleClase();
+    if (!email.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+        marcarInvalido(email);
+        valido = false;
     }
+
+    if (password1.value.length < 8 || /^\d+$/.test(password1.value)) {
+        marcarInvalido(password1);
+        valido = false;
+    }
+
+    if (password1.value !== password2.value) {
+        marcarInvalido(password2);
+        valido = false;
+    }
+
+    if (!valido) e.preventDefault();
+});
 </script>
 {% endblock %}

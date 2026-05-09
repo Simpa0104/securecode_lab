@@ -1,4 +1,3 @@
-<!-- resultado.html -->
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}Reporte de Seguridad - SecureCode Lab{% endblock %}
@@ -10,6 +9,7 @@
 {% block content %}
 {% if user.is_superuser or user.profile.role == 'admin' %}
 <a href="{% url 'dashboard_admin' %}" class="text-muted small">Volver al dashboard</a>
+{% elif user.profile.role == 'monitor' and not es_proyecto_propio %}
 {% else %}
 <a href="{% url 'project_detail' analisis.project.pk %}" class="text-muted small">Volver al proyecto</a>
 {% endif %}
@@ -34,33 +34,33 @@
     <div class="col-md-9">
         <div class="row text-center">
             <div class="col-3">
-                <div class="card border-dark">
+                <div class="card" style="border-color: #e040fb !important;">
                     <div class="card-body py-3">
-                        <h3 class="mb-0 text-dark">{{ resumen.criticas }}</h3>
+                        <h3 class="mb-0" style="color: #e040fb;">{{ resumen.criticas }}</h3>
                         <small class="text-muted">Criticas</small>
                     </div>
                 </div>
             </div>
             <div class="col-3">
-                <div class="card border-danger">
+                <div class="card" style="border-color: #dc3545 !important;">
                     <div class="card-body py-3">
-                        <h3 class="mb-0 text-danger">{{ resumen.altas }}</h3>
+                        <h3 class="mb-0" style="color: #dc3545;">{{ resumen.altas }}</h3>
                         <small class="text-muted">Altas</small>
                     </div>
                 </div>
             </div>
             <div class="col-3">
-                <div class="card border-warning">
+                <div class="card" style="border-color: #ffc107 !important;">
                     <div class="card-body py-3">
-                        <h3 class="mb-0 text-warning">{{ resumen.medias }}</h3>
+                        <h3 class="mb-0" style="color: #ffc107;">{{ resumen.medias }}</h3>
                         <small class="text-muted">Medias</small>
                     </div>
                 </div>
             </div>
             <div class="col-3">
-                <div class="card border-secondary">
+                <div class="card" style="border-color: #6c757d !important;">
                     <div class="card-body py-3">
-                        <h3 class="mb-0 text-secondary">{{ resumen.bajas }}</h3>
+                        <h3 class="mb-0" style="color: #6c757d;">{{ resumen.bajas }}</h3>
                         <small class="text-muted">Bajas</small>
                     </div>
                 </div>
@@ -104,9 +104,11 @@
 </div>
 {% endif %}
 
+{% if not user.profile.role == 'monitor' or es_proyecto_propio %}
 <div class="mt-4 mb-2">
     <a href="{% url 'analisis_historial' analisis.project.pk %}" class="btn btn-outline-secondary">
         Ver historial de analisis
     </a>
 </div>
+{% endif %}
 {% endblock %}

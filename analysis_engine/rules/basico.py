@@ -98,13 +98,13 @@ REGLAS_BASICO = [
     },
     {
         'id': 'AUTH-01',
-        'nombre': 'Contrasena en texto plano',
+        'nombre': 'Contraseña en texto plano',
         'nivel': 'BASICO',
         'owasp': 'A07 — Fallos de Autenticacion',
         'severidad': 'ALTA',
-        'descripcion': 'Se detecto almacenamiento o comparacion de contrasenas sin hashing.',
+        'descripcion': 'Se detecto almacenamiento o comparacion de contraseñas sin hashing.',
         'recomendacion': (
-            'Nunca almacenes contrasenas en texto plano. '
+            'Nunca almacenes contraseñas en texto plano. '
             'Usa make_password() y check_password() de Django.'
         ),
         'patrones': [
@@ -122,7 +122,7 @@ REGLAS_BASICO = [
         'severidad': 'CRITICA',
         'descripcion': 'Se encontraron posibles credenciales escritas directamente en el codigo.',
         'recomendacion': (
-            'Nunca escribas usuarios, contrasenas, tokens o API keys en el codigo. '
+            'Nunca escribas usuarios, contraseñas, tokens o API keys en el codigo. '
             'Usa variables de entorno o un gestor de secretos.'
         ),
         'patrones': [

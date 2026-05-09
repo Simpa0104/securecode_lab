@@ -7,10 +7,10 @@ REGLAS_AVANZADO = [
         'severidad': 'ALTA',
         'descripcion': (
             'Se detecto uso de MD5 para hashing. '
-            'MD5 es criptograficamente roto y no debe usarse para contrasenas ni integridad de datos.'
+            'MD5 es criptograficamente roto y no debe usarse para contraseñas ni integridad de datos.'
         ),
         'recomendacion': (
-            'Reemplaza MD5 por algoritmos seguros como SHA-256 o bcrypt para contrasenas. '
+            'Reemplaza MD5 por algoritmos seguros como SHA-256 o bcrypt para contraseñas. '
             'En Django usa make_password() que usa PBKDF2 por defecto.'
         ),
         'patrones': [
@@ -30,7 +30,7 @@ REGLAS_AVANZADO = [
         ),
         'recomendacion': (
             'Usa SHA-256 o superior para integridad de datos. '
-            'Para contrasenas usa siempre bcrypt, Argon2 o PBKDF2.'
+            'Para contraseñas usa siempre bcrypt, Argon2 o PBKDF2.'
         ),
         'patrones': [
             r'hashlib\.sha1\s*\(',

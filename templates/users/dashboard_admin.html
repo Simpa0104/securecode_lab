@@ -30,7 +30,7 @@
 <div class="row">
     <div class="col-md-5 mb-4">
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <strong>Usuarios recientes</strong>
                 <a href="{% url 'gestion_usuarios' %}" class="btn btn-sm btn-outline-primary">Ver todos</a>
             </div>
@@ -44,7 +44,7 @@
                     {% endif %}
                     <div class="col-12">
                         <input type="text" name="q_usuarios" class="form-control form-control-sm"
-                               placeholder="Buscar usuario..." value="{{ busqueda_usuarios }}">
+                            placeholder="Buscar usuario..." value="{{ busqueda_usuarios }}">
                     </div>
                     <div class="col-8">
                         <select name="clase_usuarios" class="form-select form-select-sm">
@@ -66,7 +66,7 @@
             <div class="card-body p-0">
                 {% if usuarios_recientes %}
                 <table class="table table-hover mb-0">
-                    <thead class="table-light">
+                    <thead class="table-dark">
                     <tr>
                         <th>Usuario</th>
                         <th>Nombre</th>
@@ -108,7 +108,7 @@
                 {% endif %}
             </div>
             {% if usuarios_recientes.has_other_pages %}
-            <div class="card-footer bg-white">
+            <div class="card-footer">
                 <nav>
                     <ul class="pagination pagination-sm justify-content-center mb-0">
                         {% if usuarios_recientes.has_previous %}
@@ -145,7 +145,7 @@
 
     <div class="col-md-7 mb-4">
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-white">
+            <div class="card-header">
                 <strong>Ultimos analisis del sistema</strong>
             </div>
             <div class="card-body border-bottom py-2 px-3">
@@ -158,7 +158,7 @@
                     {% endif %}
                     <div class="col-12">
                         <input type="text" name="q_analisis" class="form-control form-control-sm"
-                               placeholder="Buscar proyecto o usuario..." value="{{ busqueda_analisis }}">
+                            placeholder="Buscar proyecto o usuario..." value="{{ busqueda_analisis }}">
                     </div>
                     <div class="col-8">
                         <select name="clase_analisis" class="form-select form-select-sm">
@@ -180,7 +180,7 @@
             <div class="card-body p-0">
                 {% if ultimos_analisis %}
                 <table class="table table-hover mb-0">
-                    <thead class="table-light">
+                    <thead class="table-dark">
                     <tr>
                         <th>Proyecto</th>
                         <th>Usuario</th>
@@ -212,8 +212,8 @@
                         <td><small>{{ analisis.fecha|date:"d/m/Y H:i" }}</small></td>
                         <td>
                             <a href="{% url 'analisis_resultado' analisis.pk %}"
-                               class="btn btn-outline-primary"
-                               style="font-size:0.75rem; padding:2px 8px;">Ver</a>
+                            class="btn btn-outline-primary"
+                            style="font-size:0.75rem; padding:2px 8px;">Ver</a>
                         </td>
                     </tr>
                     {% endfor %}

@@ -26,10 +26,10 @@ def buscar_por_id(user_id):
     cursor.execute(f"SELECT * FROM users WHERE id = {user_id}")
     return cursor.fetchall()
 
-# AUTH-01: Contrasena en texto plano
-def verificar_contrasena(usuario, contrasena):
+# AUTH-01: Contraseña en texto plano
+def verificar_contraseña(usuario, contraseña):
     password = "admin123"
-    return contrasena == password
+    return contraseña == password
 
 # XSS-01: mark_safe sin sanitizacion
 from django.utils.safestring import mark_safe

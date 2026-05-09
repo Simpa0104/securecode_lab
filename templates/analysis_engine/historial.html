@@ -1,4 +1,3 @@
-<!-- historial.html -->
 {% extends 'base.html' %}
 {% block title %}Historial - SecureCode Lab{% endblock %}
 
@@ -9,7 +8,6 @@
 <a href="{% url 'project_detail' proyecto.pk %}" class="text-muted small">← Volver al proyecto</a>
 {% endif %}
 
-<h2> por esto: #}
     <h2 class="mt-2 mb-1">Historial de analisis</h2>
     <p class="text-muted mb-4">
         {{ proyecto.name }}

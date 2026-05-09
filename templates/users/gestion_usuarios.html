@@ -15,8 +15,8 @@
             <div class="col-md-6">
                 <label class="form-label small fw-semibold mb-1">Buscar usuario</label>
                 <input type="text" name="q" class="form-control form-control-sm"
-                       placeholder="Nombre, usuario o correo..."
-                       value="{{ busqueda }}">
+                    placeholder="Nombre, usuario o correo..."
+                    value="{{ busqueda }}">
             </div>
             <div class="col-md-4">
                 <label class="form-label small fw-semibold mb-1">Filtrar por clase</label>
@@ -56,20 +56,20 @@
                     <th>Acciones</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="tabla-usuarios">
                 {% for u in usuarios %}
-                <tr>
+                <tr id="fila-usuario-{{ u.pk }}">
                     <td class="text-muted small">{{ u.id }}</td>
                     <td>
-                        <strong>{{ u.username }}</strong>
+                        <strong class="username-{{ u.pk }}">{{ u.username }}</strong>
                         {% if u.pk == request.user.pk %}
                             <span class="badge bg-secondary ms-1">Tu cuenta</span>
                         {% endif %}
                     </td>
-                    <td class="small">{{ u.first_name|default:"—" }}</td>
-                    <td class="small">{{ u.last_name|default:"—" }}</td>
-                    <td class="small">{{ u.email|default:"—" }}</td>
-                    <td>
+                    <td class="small nombre-{{ u.pk }}">{{ u.first_name|default:"—" }}</td>
+                    <td class="small apellido-{{ u.pk }}">{{ u.last_name|default:"—" }}</td>
+                    <td class="small email-{{ u.pk }}">{{ u.email|default:"—" }}</td>
+                    <td class="rol-{{ u.pk }}">
                         {% if u.is_superuser %}
                             <span class="badge bg-danger">Superusuario</span>
                         {% elif u.profile.role == 'admin' %}
@@ -80,14 +80,14 @@
                             <span class="badge bg-secondary">Estudiante</span>
                         {% endif %}
                     </td>
-                    <td class="small">
+                    <td class="small clase-{{ u.pk }}">
                         {% if u.profile.role == 'student' or u.profile.role == 'monitor' %}
                             {{ u.profile.numero_clase|default:"—" }}
                         {% else %}
-                            <span class="text-muted">—</span>
+                            —
                         {% endif %}
                     </td>
-                    <td>
+                    <td class="estado-{{ u.pk }}">
                         {% if u.is_active %}
                             <span class="badge bg-success">Activo</span>
                         {% else %}
@@ -97,8 +97,13 @@
                     <td class="small">{{ u.date_joined|date:"d/m/Y" }}</td>
                     <td class="small">{{ u.projects.count }}</td>
                     <td>
-                        <a href="{% url 'editar_usuario' u.pk %}"
-                           class="btn btn-sm btn-outline-primary me-1">Editar</a>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-primary me-1"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalEditarUsuario"
+                                data-usuario-id="{{ u.pk }}">
+                            Editar
+                        </button>
                         {% if u.pk != request.user.pk %}
                         <button type="button"
                                 class="btn btn-sm btn-outline-danger"
@@ -157,7 +162,23 @@
     {% endif %}
 </div>
 
-<!-- Modal eliminar usuario -->
+<div class="modal fade" id="modalEditarUsuario" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+            <div class="modal-header" style="border-color: var(--border-color);">
+                <h5 class="modal-title">Editar Usuario</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modal-editar-cuerpo">
+                <div class="text-center py-4">
+                    <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+                    <p class="text-muted small mt-2 mb-0">Cargando datos...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="modalEliminarUsuario" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
@@ -187,16 +208,189 @@
 
 {% block extra_js %}
 <script>
-    const modalEliminar = document.getElementById('modalEliminarUsuario');
-    modalEliminar.addEventListener('show.bs.modal', function (event) {
-        const boton = event.relatedTarget;
-        const usuarioId = boton.getAttribute('data-usuario-id');
-        const usuarioNombre = boton.getAttribute('data-usuario-nombre');
-        const usuarioProyectos = boton.getAttribute('data-usuario-proyectos');
+const CLASES = [
+    {valor: '', etiqueta: 'Sin clase asignada'},
+    {valor: 'clase-1', etiqueta: 'Clase 1'},
+    {valor: 'clase-2', etiqueta: 'Clase 2'},
+    {valor: 'clase-3', etiqueta: 'Clase 3'},
+    {valor: 'clase-4', etiqueta: 'Clase 4'},
+    {valor: 'clase-5', etiqueta: 'Clase 5'},
+];
 
-        document.getElementById('modal-nombre-usuario').textContent = usuarioNombre;
-        document.getElementById('modal-proyectos-usuario').textContent = usuarioProyectos;
-        document.getElementById('form-eliminar-usuario').action = '/usuarios/' + usuarioId + '/eliminar/';
+const CSRF = document.cookie.split('; ')
+    .find(r => r.startsWith('csrftoken='))
+    ?.split('=')[1];
+
+const modalEditar = document.getElementById('modalEditarUsuario');
+let usuarioActualId = null;
+
+modalEditar.addEventListener('show.bs.modal', async function(event) {
+    const boton = event.relatedTarget;
+    usuarioActualId = boton.getAttribute('data-usuario-id');
+    const cuerpo = document.getElementById('modal-editar-cuerpo');
+
+    cuerpo.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+            <p class="text-muted small mt-2 mb-0">Cargando datos...</p>
+        </div>`;
+
+    try {
+        const resp = await fetch(`/usuarios/${usuarioActualId}/json/`);
+        const data = await resp.json();
+        renderFormulario(cuerpo, data);
+    } catch(e) {
+        cuerpo.innerHTML = `<div class="alert alert-danger">Error al cargar los datos del usuario.</div>`;
+    }
+});
+
+function renderFormulario(cuerpo, data) {
+    const opcionesClase = CLASES.map(c =>
+        `<option value="${c.valor}" ${data.numero_clase === c.valor ? 'selected' : ''}>${c.etiqueta}</option>`
+    ).join('');
+
+    const estadoHtml = data.es_mismo_usuario
+        ? `<div class="alert alert-warning py-2 small mb-0">No puedes desactivar tu propia cuenta.</div>`
+        : `<div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" name="is_active" id="modal_is_active" ${data.is_active ? 'checked' : ''}>
+            <label class="form-check-label" for="modal_is_active">Cuenta activa</label>
+        </div>`;
+
+    cuerpo.innerHTML = `
+        <div id="modal-alerta" class="alert alert-success d-none mb-3"></div>
+
+        <h6 class="text-muted mb-3">Datos de la cuenta</h6>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Nombre de usuario</label>
+            <input type="text" id="modal_username" name="username"
+                class="form-control" value="${data.username}" required>
+            <div class="invalid-feedback" id="error_username"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Correo electronico</label>
+            <input type="email" id="modal_email" name="email"
+                class="form-control" value="${data.email}">
+        </div>
+
+        <hr>
+        <h6 class="text-muted mb-3">Permisos</h6>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Rol</label>
+            <select id="modal_role" name="role" class="form-select">
+                <option value="student" ${data.role === 'student' ? 'selected' : ''}>Estudiante</option>
+                <option value="monitor" ${data.role === 'monitor' ? 'selected' : ''}>Monitor</option>
+                <option value="admin" ${data.role === 'admin' ? 'selected' : ''}>Profesor / Administrador</option>
+            </select>
+        </div>
+
+        <div class="mb-3" id="modal_div_clase">
+            <label class="form-label fw-semibold">Clase asignada</label>
+            <select id="modal_numero_clase" name="numero_clase" class="form-select">
+                ${opcionesClase}
+            </select>
+            <div class="form-text">Aplica para estudiantes y monitores.</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Estado de la cuenta</label>
+            ${estadoHtml}
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="btn-guardar-usuario">Guardar cambios</button>
+        </div>`;
+
+    const roleSelect = document.getElementById('modal_role');
+    const divClase = document.getElementById('modal_div_clase');
+
+    function toggleClase() {
+        divClase.style.display = ['student', 'monitor'].includes(roleSelect.value) ? 'block' : 'none';
+    }
+    roleSelect.addEventListener('change', toggleClase);
+    toggleClase();
+
+    document.getElementById('btn-guardar-usuario').addEventListener('click', async () => {
+        await guardarUsuario(data.es_mismo_usuario);
     });
+}
+
+async function guardarUsuario(esMismoUsuario) {
+    const username = document.getElementById('modal_username').value.trim();
+    const email = document.getElementById('modal_email').value.trim();
+    const role = document.getElementById('modal_role').value;
+    const numero_clase = document.getElementById('modal_numero_clase')?.value || '';
+    const is_active = !esMismoUsuario && document.getElementById('modal_is_active')?.checked;
+
+    document.getElementById('modal_username').classList.remove('is-invalid', 'is-valid');
+
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('email', email);
+    formData.append('role', role);
+    formData.append('numero_clase', numero_clase);
+    if (is_active) formData.append('is_active', 'on');
+
+    const resp = await fetch(`/usuarios/${usuarioActualId}/editar/modal/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': CSRF},
+        body: formData,
+    });
+
+    const data = await resp.json();
+
+    if (!data.ok) {
+        if (data.errores?.username) {
+            const campo = document.getElementById('modal_username');
+            campo.classList.add('is-invalid');
+            document.getElementById('error_username').textContent = data.errores.username;
+        }
+        return;
+    }
+
+    const u = data.usuario;
+    const rolTexto = {student: 'Estudiante', monitor: 'Monitor', admin: 'Profesor'}[u.role] || u.role;
+    const rolBadge = {
+        student: '<span class="badge bg-secondary">Estudiante</span>',
+        monitor: '<span class="badge bg-info text-dark">Monitor</span>',
+        admin: '<span class="badge bg-danger">Profesor</span>',
+    }[u.role] || '';
+
+    const claseTexto = ['student', 'monitor'].includes(u.role) ? (u.numero_clase || '—') : '—';
+    const estadoBadge = u.is_active
+        ? '<span class="badge bg-success">Activo</span>'
+        : '<span class="badge bg-warning text-dark">Inactivo</span>';
+
+    const fila = document.getElementById(`fila-usuario-${usuarioActualId}`);
+    if (fila) {
+        fila.querySelector(`.username-${usuarioActualId}`).textContent = u.username;
+        fila.querySelector(`.nombre-${usuarioActualId}`).textContent = u.first_name || '—';
+        fila.querySelector(`.apellido-${usuarioActualId}`).textContent = u.last_name || '—';
+        fila.querySelector(`.email-${usuarioActualId}`).textContent = u.email || '—';
+        fila.querySelector(`.rol-${usuarioActualId}`).innerHTML = rolBadge;
+        fila.querySelector(`.clase-${usuarioActualId}`).textContent = claseTexto;
+        fila.querySelector(`.estado-${usuarioActualId}`).innerHTML = estadoBadge;
+    }
+
+    const alerta = document.getElementById('modal-alerta');
+    alerta.textContent = data.mensaje;
+    alerta.classList.remove('d-none');
+
+    setTimeout(() => {
+        bootstrap.Modal.getInstance(modalEditar).hide();
+    }, 1000);
+}
+
+const modalEliminar = document.getElementById('modalEliminarUsuario');
+modalEliminar.addEventListener('show.bs.modal', function(event) {
+    const boton = event.relatedTarget;
+    document.getElementById('modal-nombre-usuario').textContent = boton.getAttribute('data-usuario-nombre');
+    document.getElementById('modal-proyectos-usuario').textContent = boton.getAttribute('data-usuario-proyectos');
+    document.getElementById('form-eliminar-usuario').action =
+        '/usuarios/' + boton.getAttribute('data-usuario-id') + '/eliminar/';
+});
 </script>
 {% endblock %}

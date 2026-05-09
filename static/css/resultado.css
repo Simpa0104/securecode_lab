@@ -1,4 +1,3 @@
-/* static/css/resultado.css */
 .score-circle {
     width: 140px;
     height: 140px;
@@ -19,7 +18,7 @@
 }
 
 .vuln-CRITICA {
-    border-color: #212529;
+    border-color: #e040fb;
 }
 
 .vuln-ALTA {
@@ -35,8 +34,8 @@
 }
 
 .badge-CRITICA {
-    background-color: #212529;
-    color: white;
+    background-color: #7b1fa2;
+    color: #f3e5f5;
 }
 
 .badge-ALTA {
@@ -46,19 +45,21 @@
 
 .badge-MEDIA {
     background-color: #ffc107;
-    color: black;
+    color: #1a1a1a;
 }
 
 .badge-BAJA {
-    background-color: #6c757d;
-    color: white;
+    background-color: #495057;
+    color: #dee2e6;
 }
 
 .code-snippet {
-    background: #f8f9fa;
+    background-color: #0d1117;
+    border: 1px solid rgba(255,255,255,0.1);
     padding: 8px 12px;
     border-radius: 4px;
     font-family: monospace;
     font-size: 0.85rem;
     word-break: break-all;
+    color: #e6edf3;
 }

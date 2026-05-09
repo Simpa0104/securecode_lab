@@ -1,10 +1,9 @@
-# config/urls.py
 from django.contrib import admin
 from django.urls import path, include
 from users.views import (
     home, register, dashboard_estudiante, dashboard_admin,
     dashboard_monitor, gestion_usuarios, editar_usuario,
-    eliminar_usuario, perfil
+    eliminar_usuario, perfil, usuario_json, editar_usuario_modal
 )
 
 urlpatterns = [
@@ -18,6 +17,8 @@ urlpatterns = [
     path('perfil/', perfil, name='perfil'),
     path('usuarios/', gestion_usuarios, name='gestion_usuarios'),
     path('usuarios/<int:user_pk>/editar/', editar_usuario, name='editar_usuario'),
+    path('usuarios/<int:user_pk>/editar/modal/', editar_usuario_modal, name='editar_usuario_modal'),
+    path('usuarios/<int:user_pk>/json/', usuario_json, name='usuario_json'),
     path('usuarios/<int:user_pk>/eliminar/', eliminar_usuario, name='eliminar_usuario'),
     path('projects/', include('projects.urls')),
     path('analysis/', include('analysis_engine.urls')),
