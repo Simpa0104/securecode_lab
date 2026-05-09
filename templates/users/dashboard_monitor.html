@@ -1,4 +1,4 @@
-<!-- dashboard_monitor.html -->
+<!-- /users/dashboard_monitor.html -->
 {% extends 'base.html' %}
 {% block title %}Panel Monitor - SecureCode Lab{% endblock %}
 
@@ -79,8 +79,8 @@
                 <td><small>{{ analisis.fecha|date:"d/m/Y H:i" }}</small></td>
                 <td>
                     <a href="{% url 'analisis_resultado' analisis.pk %}"
-                       class="btn btn-outline-primary"
-                       style="font-size:0.75rem; padding:2px 8px;">Ver</a>
+                    class="btn btn-outline-primary"
+                    style="font-size:0.75rem; padding:2px 8px;">Ver</a>
                 </td>
             </tr>
             {% endfor %}

@@ -1,3 +1,5 @@
+# config/urls.py
+
 from django.contrib import admin
 from django.urls import path, include
 from users.views import (
@@ -22,4 +24,5 @@ urlpatterns = [
     path('usuarios/<int:user_pk>/eliminar/', eliminar_usuario, name='eliminar_usuario'),
     path('projects/', include('projects.urls')),
     path('analysis/', include('analysis_engine.urls')),
+    path('api/', include('api.urls')),
 ]

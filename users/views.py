@@ -1,3 +1,4 @@
+#  /users/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -11,6 +12,7 @@ from .forms import RegisterForm
 from .models import Profile
 from projects.models import Project
 from analysis_engine.models import Analisis
+from rest_framework.authtoken.models import Token
 
 
 def es_admin(user):
@@ -60,6 +62,7 @@ def dashboard_estudiante(request):
     mejor_score = Analisis.objects.filter(
         project__user=request.user
     ).order_by('-score').values_list('score', flat=True).first()
+    token, _ = Token.objects.get_or_create(user=request.user)
 
     return render(request, 'users/dashboard_estudiante.html', {
         'proyectos': proyectos[:4],
@@ -67,6 +70,7 @@ def dashboard_estudiante(request):
         'total_proyectos': total_proyectos,
         'proyectos_analizados': proyectos_analizados,
         'mejor_score': mejor_score or 'N/A',
+        'api_token': token.key,
     })
 
 

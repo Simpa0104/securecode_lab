@@ -1,4 +1,4 @@
-<!-- dasboard_estudiante.html -->
+<!-- /users/dashboard_estudiante.html -->
 {% extends 'base.html' %}
 {% block title %}Dashboard - SecureCode Lab{% endblock %}
 
@@ -96,4 +96,120 @@
         </div>
     </div>
 </div>
+
+<div class="row mt-2">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Panel API REST <span class="badge bg-secondary ms-1" style="font-size:0.7rem;">RF-12</span></strong>
+                <span class="text-muted small">Datos en tiempo real via token</span>
+            </div>
+            <div class="card-body">
+                
+                <!-- Estado del token -->
+                <div class="mb-3 d-flex align-items-center gap-2">
+                    <span class="text-muted small">Token:</span>
+                    <code id="api-token-display"
+                        style="background:var(--bg-input); color:#75c596; padding:3px 10px;
+                                border-radius:6px; font-size:0.78rem; letter-spacing:1px;">
+                        {{ api_token }}
+                    </code>
+                    <button class="btn btn-outline-secondary btn-sm py-0"
+                            onclick="copiarToken()" style="font-size:0.75rem;">
+                        Copiar
+                    </button>
+                </div>
+
+                <!-- Botones de endpoints -->
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <button class="btn btn-sm btn-outline-primary"
+                            onclick="llamarAPI('resumen')">
+                        GET /api/resumen/
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary"
+                            onclick="llamarAPI('proyectos')">
+                        GET /api/proyectos/
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary"
+                            onclick="llamarAPI('analisis')">
+                        GET /api/analisis/
+                    </button>
+                </div>
+
+                <!-- Respuesta JSON -->
+                <div id="api-estado" class="text-muted small mb-2" style="display:none;">
+                    <span id="api-metodo" class="badge bg-success me-1">GET</span>
+                    <span id="api-url"></span>
+                    <span class="ms-2 badge" id="api-status-badge"></span>
+                </div>
+
+                <pre id="api-respuesta"
+                    style="background:var(--bg-input); color:#e6edf3; padding:14px;
+                            border-radius:8px; font-size:0.78rem; max-height:260px;
+                            overflow-y:auto; display:none; border:1px solid var(--border-color);">
+                </pre>
+
+                <div id="api-loading" style="display:none;" class="text-muted small">
+                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                    Consultando API...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const API_TOKEN = "{{ api_token }}";
+
+async function llamarAPI(endpoint) {
+    const urls = {
+        'resumen':    '/api/resumen/',
+        'proyectos':  '/api/proyectos/',
+        'analisis':   '/api/analisis/',
+    };
+
+    const url = urls[endpoint];
+    const respEl    = document.getElementById('api-respuesta');
+    const loadingEl = document.getElementById('api-loading');
+    const estadoEl  = document.getElementById('api-estado');
+    const urlEl     = document.getElementById('api-url');
+    const badgeEl   = document.getElementById('api-status-badge');
+
+    respEl.style.display    = 'none';
+    loadingEl.style.display = 'block';
+    estadoEl.style.display  = 'none';
+
+    try {
+        const resp = await fetch(url, {
+            headers: { 'Authorization': 'Token ' + API_TOKEN }
+        });
+
+        const data = await resp.json();
+
+        urlEl.textContent = url;
+        badgeEl.textContent = resp.status + ' ' + (resp.ok ? 'OK' : 'Error');
+        badgeEl.className = 'ms-2 badge ' + (resp.ok ? 'bg-success' : 'bg-danger');
+
+        respEl.textContent  = JSON.stringify(data, null, 2);
+        respEl.style.display = 'block';
+        estadoEl.style.display = 'block';
+    } catch (e) {
+        respEl.textContent   = 'Error de red: ' + e.message;
+        respEl.style.display = 'block';
+        estadoEl.style.display = 'block';
+        badgeEl.textContent  = 'Error';
+        badgeEl.className    = 'ms-2 badge bg-danger';
+    } finally {
+        loadingEl.style.display = 'none';
+    }
+}
+
+function copiarToken() {
+    navigator.clipboard.writeText(API_TOKEN).then(() => {
+        const btn = event.target;
+        btn.textContent = '✓ Copiado';
+        setTimeout(() => btn.textContent = 'Copiar', 1500);
+    });
+}
+</script>
 {% endblock %}

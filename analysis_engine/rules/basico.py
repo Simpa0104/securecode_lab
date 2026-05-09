@@ -1,3 +1,4 @@
+#  /analysis_engine/rules/basico.py
 REGLAS_BASICO = [
     {
         'id': 'SQL-01',

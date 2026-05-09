@@ -1,3 +1,4 @@
+#  /analysis_engine/rules/avanzado.py
 REGLAS_AVANZADO = [
     {
         'id': 'HASH-01',
