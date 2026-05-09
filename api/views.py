@@ -8,46 +8,71 @@ from projects.models import Project
 from analysis_engine.models import Analisis
 from .serializers import (
     ProjectSerializer,
+    ProjectWriteSerializer,
     AnalisisSerializer,
     AnalisisListSerializer,
 )
 
-@api_view(['GET'])
+
+# ──────────────────────────────────────────────
+# PROYECTOS
+# ──────────────────────────────────────────────
+
+@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def proyecto_list(request):
-    """
-    GET /api/proyectos/
-    Devuelve todos los proyectos del usuario autenticado.
-    """
-    proyectos = Project.objects.filter(user=request.user).order_by('-created_at')
-    serializer = ProjectSerializer(proyectos, many=True)
-    return Response({
-        'count': proyectos.count(),
-        'proyectos': serializer.data,
-    })
+    if request.method == 'GET':
+        proyectos = Project.objects.filter(user=request.user).order_by('-created_at')
+        serializer = ProjectSerializer(proyectos, many=True)
+        return Response({
+            'count': proyectos.count(),
+            'proyectos': serializer.data,
+        })
 
-@api_view(['GET'])
+    # POST
+    serializer = ProjectWriteSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save(user=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def proyecto_detail(request, pk):
-    """
-    GET /api/proyectos/<pk>/
-    Devuelve el detalle de un proyecto con su historial de analisis.
-    """
     proyecto = get_object_or_404(Project, pk=pk, user=request.user)
-    analisis_list = proyecto.analisis.order_by('-fecha')
 
-    return Response({
-        'proyecto': ProjectSerializer(proyecto).data,
-        'historial': AnalisisListSerializer(analisis_list, many=True).data,
-    })
+    if request.method == 'GET':
+        analisis_qs = proyecto.analisis.order_by('-fecha')
+        return Response({
+            'proyecto': ProjectSerializer(proyecto).data,
+            'historial': AnalisisListSerializer(analisis_qs, many=True).data,
+        })
+
+    if request.method in ('PUT', 'PATCH'):
+        partial = request.method == 'PATCH'
+        serializer = ProjectWriteSerializer(proyecto, data=request.data, partial=partial)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # DELETE
+    nombre = proyecto.name
+    proyecto.delete()
+    return Response(
+        {'mensaje': f'Proyecto "{nombre}" eliminado correctamente.'},
+        status=status.HTTP_200_OK,
+    )
+
+
+# ──────────────────────────────────────────────
+# ANÁLISIS
+# ──────────────────────────────────────────────
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def analisis_list(request):
-    """
-    GET /api/analisis/
-    Devuelve todos los analisis del usuario autenticado (sin vulnerabilidades).
-    """
     analisis = Analisis.objects.filter(
         project__user=request.user
     ).select_related('project').order_by('-fecha')
@@ -58,26 +83,38 @@ def analisis_list(request):
         'analisis': serializer.data,
     })
 
-@api_view(['GET'])
+
+@api_view(['GET', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def analisis_detail(request, pk):
-    """
-    GET /api/analisis/<pk>/
-    Devuelve el detalle completo de un analisis con sus vulnerabilidades.
-    """
-    analisis = get_object_or_404(
-        Analisis, pk=pk, project__user=request.user
+    analisis = get_object_or_404(Analisis, pk=pk, project__user=request.user)
+
+    if request.method == 'GET':
+        serializer = AnalisisSerializer(analisis)
+        return Response(serializer.data)
+
+    # DELETE
+    proyecto_nombre = analisis.project.name
+    fecha = analisis.fecha
+    analisis.delete()
+    return Response(
+        {
+            'mensaje': (
+                f'Análisis del proyecto "{proyecto_nombre}" '
+                f'con fecha {fecha} eliminado correctamente.'
+            )
+        },
+        status=status.HTTP_200_OK,
     )
-    serializer = AnalisisSerializer(analisis)
-    return Response(serializer.data)
+
+
+# ──────────────────────────────────────────────
+# RESUMEN
+# ──────────────────────────────────────────────
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def resumen(request):
-    """
-    GET /api/resumen/
-    Devuelve estadisticas generales del usuario: totales y mejor score.
-    """
     proyectos = Project.objects.filter(user=request.user)
     analisis = Analisis.objects.filter(project__user=request.user)
 

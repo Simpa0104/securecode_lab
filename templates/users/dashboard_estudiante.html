@@ -105,8 +105,8 @@
                 <span class="text-muted small">Datos en tiempo real via token</span>
             </div>
             <div class="card-body">
-                
-                <!-- Estado del token -->
+
+                <!-- Token -->
                 <div class="mb-3 d-flex align-items-center gap-2">
                     <span class="text-muted small">Token:</span>
                     <code id="api-token-display"
@@ -120,25 +120,149 @@
                     </button>
                 </div>
 
-                <!-- Botones de endpoints -->
+                <!-- ── GET endpoints ── -->
+                <p class="text-muted small mb-1 mt-2" style="font-size:0.72rem; text-transform:uppercase; letter-spacing:1px;">Lectura</p>
                 <div class="d-flex flex-wrap gap-2 mb-3">
                     <button class="btn btn-sm btn-outline-primary"
-                            onclick="llamarAPI('resumen')">
-                        GET /api/resumen/
+                            onclick="llamarAPI('GET', '/api/resumen/')">
+                        <span class="badge bg-primary me-1" style="font-size:0.65rem;">GET</span>/api/resumen/
                     </button>
                     <button class="btn btn-sm btn-outline-primary"
-                            onclick="llamarAPI('proyectos')">
-                        GET /api/proyectos/
+                            onclick="llamarAPI('GET', '/api/proyectos/')">
+                        <span class="badge bg-primary me-1" style="font-size:0.65rem;">GET</span>/api/proyectos/
                     </button>
                     <button class="btn btn-sm btn-outline-primary"
-                            onclick="llamarAPI('analisis')">
-                        GET /api/analisis/
+                            onclick="llamarAPI('GET', '/api/analisis/')">
+                        <span class="badge bg-primary me-1" style="font-size:0.65rem;">GET</span>/api/analisis/
                     </button>
                 </div>
 
-                <!-- Respuesta JSON -->
+                <!-- ── POST endpoint ── -->
+                <p class="text-muted small mb-1 mt-1" style="font-size:0.72rem; text-transform:uppercase; letter-spacing:1px;">Creación</p>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <button class="btn btn-sm btn-outline-success"
+                            onclick="mostrarFormulario('crear')">
+                        <span class="badge bg-success me-1" style="font-size:0.65rem;">POST</span>/api/proyectos/
+                    </button>
+                </div>
+
+                <!-- Formulario crear proyecto -->
+                <div id="form-crear" class="mb-3 p-3 rounded" style="background:var(--bg-input); border:1px solid var(--border-color); display:none;">
+                    <p class="small text-muted mb-2">Nuevo proyecto <code>POST /api/proyectos/</code></p>
+                    <div class="mb-2">
+                        <label class="form-label small">Nombre</label>
+                        <input id="crear-nombre" type="text" class="form-control form-control-sm" placeholder="Mi proyecto">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small">Descripción (opcional)</label>
+                        <input id="crear-desc" type="text" class="form-control form-control-sm" placeholder="Descripción breve">
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-success btn-sm" onclick="crearProyecto()">Enviar</button>
+                        <button class="btn btn-secondary btn-sm" onclick="ocultarFormulario('crear')">Cancelar</button>
+                    </div>
+                </div>
+
+                <!-- ── PUT / PATCH / DELETE proyectos ── -->
+                <p class="text-muted small mb-1 mt-1" style="font-size:0.72rem; text-transform:uppercase; letter-spacing:1px;">Modificación / eliminación de proyectos</p>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <button class="btn btn-sm btn-outline-warning"
+                            onclick="mostrarFormulario('editar')">
+                        <span class="badge bg-warning text-dark me-1" style="font-size:0.65rem;">PUT</span>/api/proyectos/&lt;pk&gt;/
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning"
+                            onclick="mostrarFormulario('patch')">
+                        <span class="badge bg-warning text-dark me-1" style="font-size:0.65rem;">PATCH</span>/api/proyectos/&lt;pk&gt;/
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger"
+                            onclick="mostrarFormulario('eliminar-proyecto')">
+                        <span class="badge bg-danger me-1" style="font-size:0.65rem;">DELETE</span>/api/proyectos/&lt;pk&gt;/
+                    </button>
+                </div>
+
+                <!-- Formulario PUT -->
+                <div id="form-editar" class="mb-3 p-3 rounded" style="background:var(--bg-input); border:1px solid var(--border-color); display:none;">
+                    <p class="small text-muted mb-2">Actualizar proyecto completo <code>PUT /api/proyectos/&lt;pk&gt;/</code></p>
+                    <div class="mb-2">
+                        <label class="form-label small">ID del proyecto</label>
+                        <input id="put-pk" type="number" class="form-control form-control-sm" placeholder="1">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small">Nuevo nombre</label>
+                        <input id="put-nombre" type="text" class="form-control form-control-sm">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small">Nueva descripción</label>
+                        <input id="put-desc" type="text" class="form-control form-control-sm">
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-warning btn-sm" onclick="editarProyecto('PUT')">Enviar PUT</button>
+                        <button class="btn btn-secondary btn-sm" onclick="ocultarFormulario('editar')">Cancelar</button>
+                    </div>
+                </div>
+
+                <!-- Formulario PATCH -->
+                <div id="form-patch" class="mb-3 p-3 rounded" style="background:var(--bg-input); border:1px solid var(--border-color); display:none;">
+                    <p class="small text-muted mb-2">Actualizar proyecto parcialmente <code>PATCH /api/proyectos/&lt;pk&gt;/</code></p>
+                    <div class="mb-2">
+                        <label class="form-label small">ID del proyecto</label>
+                        <input id="patch-pk" type="number" class="form-control form-control-sm" placeholder="1">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small">Campo a actualizar</label>
+                        <select id="patch-campo" class="form-select form-select-sm">
+                            <option value="name">Nombre</option>
+                            <option value="description">Descripción</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small">Nuevo valor</label>
+                        <input id="patch-valor" type="text" class="form-control form-control-sm">
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-warning btn-sm" onclick="editarProyecto('PATCH')">Enviar PATCH</button>
+                        <button class="btn btn-secondary btn-sm" onclick="ocultarFormulario('patch')">Cancelar</button>
+                    </div>
+                </div>
+
+                <!-- Formulario DELETE proyecto -->
+                <div id="form-eliminar-proyecto" class="mb-3 p-3 rounded" style="background:var(--bg-input); border:1px solid var(--border-color); display:none;">
+                    <p class="small text-muted mb-2">Eliminar proyecto <code>DELETE /api/proyectos/&lt;pk&gt;/</code></p>
+                    <div class="mb-2">
+                        <label class="form-label small">ID del proyecto</label>
+                        <input id="del-proyecto-pk" type="number" class="form-control form-control-sm" placeholder="1">
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-danger btn-sm" onclick="eliminarProyecto()">Confirmar DELETE</button>
+                        <button class="btn btn-secondary btn-sm" onclick="ocultarFormulario('eliminar-proyecto')">Cancelar</button>
+                    </div>
+                </div>
+
+                <!-- ── DELETE análisis ── -->
+                <p class="text-muted small mb-1 mt-1" style="font-size:0.72rem; text-transform:uppercase; letter-spacing:1px;">Eliminación de análisis</p>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <button class="btn btn-sm btn-outline-danger"
+                            onclick="mostrarFormulario('eliminar-analisis')">
+                        <span class="badge bg-danger me-1" style="font-size:0.65rem;">DELETE</span>/api/analisis/&lt;pk&gt;/
+                    </button>
+                </div>
+
+                <!-- Formulario DELETE análisis -->
+                <div id="form-eliminar-analisis" class="mb-3 p-3 rounded" style="background:var(--bg-input); border:1px solid var(--border-color); display:none;">
+                    <p class="small text-muted mb-2">Eliminar análisis <code>DELETE /api/analisis/&lt;pk&gt;/</code></p>
+                    <div class="mb-2">
+                        <label class="form-label small">ID del análisis</label>
+                        <input id="del-analisis-pk" type="number" class="form-control form-control-sm" placeholder="1">
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-danger btn-sm" onclick="eliminarAnalisis()">Confirmar DELETE</button>
+                        <button class="btn btn-secondary btn-sm" onclick="ocultarFormulario('eliminar-analisis')">Cancelar</button>
+                    </div>
+                </div>
+
+                <!-- Estado y respuesta JSON -->
                 <div id="api-estado" class="text-muted small mb-2" style="display:none;">
-                    <span id="api-metodo" class="badge bg-success me-1">GET</span>
+                    <span id="api-metodo" class="badge me-1">GET</span>
                     <span id="api-url"></span>
                     <span class="ms-2 badge" id="api-status-badge"></span>
                 </div>
@@ -153,6 +277,7 @@
                     <div class="spinner-border spinner-border-sm me-2" role="status"></div>
                     Consultando API...
                 </div>
+
             </div>
         </div>
     </div>
@@ -161,36 +286,59 @@
 <script>
 const API_TOKEN = "{{ api_token }}";
 
-async function llamarAPI(endpoint) {
-    const urls = {
-        'resumen':    '/api/resumen/',
-        'proyectos':  '/api/proyectos/',
-        'analisis':   '/api/analisis/',
-    };
+const METODO_COLORS = {
+    GET:    'bg-primary',
+    POST:   'bg-success',
+    PUT:    'bg-warning',
+    PATCH:  'bg-warning',
+    DELETE: 'bg-danger',
+};
 
-    const url = urls[endpoint];
+function mostrarFormulario(id) {
+    // Oculta todos los formularios
+    document.querySelectorAll('[id^="form-"]').forEach(f => f.style.display = 'none');
+    document.getElementById('form-' + id).style.display = 'block';
+}
+
+function ocultarFormulario(id) {
+    document.getElementById('form-' + id).style.display = 'none';
+}
+
+async function llamarAPI(metodo, url, body = null) {
     const respEl    = document.getElementById('api-respuesta');
     const loadingEl = document.getElementById('api-loading');
     const estadoEl  = document.getElementById('api-estado');
     const urlEl     = document.getElementById('api-url');
     const badgeEl   = document.getElementById('api-status-badge');
+    const metodoEl  = document.getElementById('api-metodo');
 
     respEl.style.display    = 'none';
     loadingEl.style.display = 'block';
     estadoEl.style.display  = 'none';
 
-    try {
-        const resp = await fetch(url, {
-            headers: { 'Authorization': 'Token ' + API_TOKEN }
-        });
+    const opciones = {
+        method: metodo,
+        headers: { 'Authorization': 'Token ' + API_TOKEN },
+    };
 
+    if (body) {
+        opciones.headers['Content-Type'] = 'application/json';
+        opciones.body = JSON.stringify(body);
+    }
+
+    try {
+        const resp = await fetch(url, opciones);
         const data = await resp.json();
+
+        metodoEl.textContent = metodo;
+        metodoEl.className   = 'badge me-1 ' + (METODO_COLORS[metodo] || 'bg-secondary');
+        if (metodo === 'PUT' || metodo === 'PATCH') metodoEl.classList.add('text-dark');
 
         urlEl.textContent = url;
         badgeEl.textContent = resp.status + ' ' + (resp.ok ? 'OK' : 'Error');
-        badgeEl.className = 'ms-2 badge ' + (resp.ok ? 'bg-success' : 'bg-danger');
+        badgeEl.className   = 'ms-2 badge ' + (resp.ok ? 'bg-success' : 'bg-danger');
 
-        respEl.textContent  = JSON.stringify(data, null, 2);
+        respEl.textContent   = JSON.stringify(data, null, 2);
         respEl.style.display = 'block';
         estadoEl.style.display = 'block';
     } catch (e) {
@@ -202,6 +350,51 @@ async function llamarAPI(endpoint) {
     } finally {
         loadingEl.style.display = 'none';
     }
+}
+
+// ── Acciones concretas ────────────────────────────────────────────────────────
+
+function crearProyecto() {
+    const nombre = document.getElementById('crear-nombre').value.trim();
+    const desc   = document.getElementById('crear-desc').value.trim();
+    if (!nombre) { alert('El nombre es obligatorio.'); return; }
+    ocultarFormulario('crear');
+    llamarAPI('POST', '/api/proyectos/', { name: nombre, description: desc });
+}
+
+function editarProyecto(metodo) {
+    const prefix = metodo === 'PUT' ? 'put' : 'patch';
+    const pk = document.getElementById(prefix + '-pk').value;
+    if (!pk) { alert('Ingresa el ID del proyecto.'); return; }
+
+    let body = {};
+    if (metodo === 'PUT') {
+        body.name        = document.getElementById('put-nombre').value.trim();
+        body.description = document.getElementById('put-desc').value.trim();
+    } else {
+        const campo = document.getElementById('patch-campo').value;
+        const valor = document.getElementById('patch-valor').value.trim();
+        body[campo] = valor;
+    }
+
+    ocultarFormulario(metodo === 'PUT' ? 'editar' : 'patch');
+    llamarAPI(metodo, `/api/proyectos/${pk}/`, body);
+}
+
+function eliminarProyecto() {
+    const pk = document.getElementById('del-proyecto-pk').value;
+    if (!pk) { alert('Ingresa el ID del proyecto.'); return; }
+    if (!confirm(`¿Seguro que quieres eliminar el proyecto ID ${pk}? Esta acción no se puede deshacer.`)) return;
+    ocultarFormulario('eliminar-proyecto');
+    llamarAPI('DELETE', `/api/proyectos/${pk}/`);
+}
+
+function eliminarAnalisis() {
+    const pk = document.getElementById('del-analisis-pk').value;
+    if (!pk) { alert('Ingresa el ID del análisis.'); return; }
+    if (!confirm(`¿Seguro que quieres eliminar el análisis ID ${pk}?`)) return;
+    ocultarFormulario('eliminar-analisis');
+    llamarAPI('DELETE', `/api/analisis/${pk}/`);
 }
 
 function copiarToken() {
