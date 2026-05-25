@@ -13,11 +13,6 @@ from .serializers import (
     AnalisisListSerializer,
 )
 
-
-# ──────────────────────────────────────────────
-# PROYECTOS
-# ──────────────────────────────────────────────
-
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def proyecto_list(request):
@@ -29,7 +24,6 @@ def proyecto_list(request):
             'proyectos': serializer.data,
         })
 
-    # POST
     serializer = ProjectWriteSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save(user=request.user)
@@ -57,60 +51,12 @@ def proyecto_detail(request, pk):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # DELETE
     nombre = proyecto.name
     proyecto.delete()
     return Response(
         {'mensaje': f'Proyecto "{nombre}" eliminado correctamente.'},
         status=status.HTTP_200_OK,
     )
-
-
-# ──────────────────────────────────────────────
-# ANÁLISIS
-# ──────────────────────────────────────────────
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def analisis_list(request):
-    analisis = Analisis.objects.filter(
-        project__user=request.user
-    ).select_related('project').order_by('-fecha')
-
-    serializer = AnalisisListSerializer(analisis, many=True)
-    return Response({
-        'count': analisis.count(),
-        'analisis': serializer.data,
-    })
-
-
-@api_view(['GET', 'DELETE'])
-@permission_classes([IsAuthenticated])
-def analisis_detail(request, pk):
-    analisis = get_object_or_404(Analisis, pk=pk, project__user=request.user)
-
-    if request.method == 'GET':
-        serializer = AnalisisSerializer(analisis)
-        return Response(serializer.data)
-
-    # DELETE
-    proyecto_nombre = analisis.project.name
-    fecha = analisis.fecha
-    analisis.delete()
-    return Response(
-        {
-            'mensaje': (
-                f'Análisis del proyecto "{proyecto_nombre}" '
-                f'con fecha {fecha} eliminado correctamente.'
-            )
-        },
-        status=status.HTTP_200_OK,
-    )
-
-
-# ──────────────────────────────────────────────
-# RESUMEN
-# ──────────────────────────────────────────────
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

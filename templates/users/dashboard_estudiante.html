@@ -131,10 +131,6 @@
                             onclick="llamarAPI('GET', '/api/proyectos/')">
                         <span class="badge bg-primary me-1" style="font-size:0.65rem;">GET</span>/api/proyectos/
                     </button>
-                    <button class="btn btn-sm btn-outline-primary"
-                            onclick="llamarAPI('GET', '/api/analisis/')">
-                        <span class="badge bg-primary me-1" style="font-size:0.65rem;">GET</span>/api/analisis/
-                    </button>
                 </div>
 
                 <!-- ── POST endpoint ── -->
@@ -236,15 +232,6 @@
                         <button class="btn btn-danger btn-sm" onclick="eliminarProyecto()">Confirmar DELETE</button>
                         <button class="btn btn-secondary btn-sm" onclick="ocultarFormulario('eliminar-proyecto')">Cancelar</button>
                     </div>
-                </div>
-
-                <!-- ── DELETE análisis ── -->
-                <p class="text-muted small mb-1 mt-1" style="font-size:0.72rem; text-transform:uppercase; letter-spacing:1px;">Eliminación de análisis</p>
-                <div class="d-flex flex-wrap gap-2 mb-3">
-                    <button class="btn btn-sm btn-outline-danger"
-                            onclick="mostrarFormulario('eliminar-analisis')">
-                        <span class="badge bg-danger me-1" style="font-size:0.65rem;">DELETE</span>/api/analisis/&lt;pk&gt;/
-                    </button>
                 </div>
 
                 <!-- Formulario DELETE análisis -->
